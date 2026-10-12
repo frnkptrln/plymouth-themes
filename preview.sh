@@ -8,6 +8,9 @@
 #   sudo ./preview.sh trisolaris shutdown    power-off (or: reboot)
 #
 # Typed passphrases are discarded. Ctrl+Alt+F1/F2 takes you back afterwards.
+# After the passphrase (or straight away, without one) the preview sends the
+# units of the running system in the order they started at this boot, as
+# systemd did then: readback writes them, the other themes ignore them.
 set -euo pipefail
 
 THEME="${1:-}"
@@ -28,6 +31,32 @@ fi
 if pgrep -x plymouthd >/dev/null; then
   echo "plymouthd is already running."; exit 1
 fi
+
+# the active services, mounts and swaps of this boot, oldest first
+boot_units() {
+  local units
+  units="$(systemctl list-units --type=service,mount,swap --state=active --no-legend --plain 2>/dev/null |
+           awk '{print $1}')"
+  [ -n "$units" ] || return 0
+  # shellcheck disable=SC2086
+  systemctl show -p Id -p ActiveEnterTimestampMonotonic $units 2>/dev/null |
+    awk 'BEGIN { RS = ""; FS = "\n" }
+         { id = ""; t = 0
+           for (i = 1; i <= NF; i++) {
+             if ($i ~ /^Id=/) id = substr($i, 4)
+             else if ($i ~ /^ActiveEnterTimestampMonotonic=/) t = substr($i, 31) + 0
+           }
+           if (id != "" && t > 0) print t, id }' |
+    sort -n | cut -d' ' -f2-
+}
+
+send_units() {
+  local u
+  boot_units | while IFS= read -r u; do
+    plymouth update --status="$u" || true
+    sleep 0.04
+  done
+}
 
 PREV="$(plymouth-set-default-theme)"
 cleanup() {
@@ -55,7 +84,9 @@ if [ "$MODE" = luks ]; then
   plymouth ask-for-password --prompt="$P" >/dev/null || true   # first try: treated as wrong
   sleep 1.5
   plymouth ask-for-password --prompt="$P" >/dev/null || true   # second try
-  sleep 9
+  send_units || true
+  sleep 6
 else
-  sleep 10
+  [ "$MODE" = plain ] && { send_units || true; }
+  sleep 8
 fi

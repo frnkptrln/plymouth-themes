@@ -179,8 +179,10 @@ sudo ./preview.sh eca shutdown      # power-off (or: reboot)
 ```
 
 The preview asks twice with the same prompt, so the first answer counts as a
-wrong passphrase. What you type is thrown away, and the previous default
-theme is put back afterwards.
+wrong passphrase. Then it sends the units of the running system in the order
+they started at this boot, the way systemd does while booting: readback writes
+them, the other themes ignore them. What you type is thrown away, and the
+previous default theme is put back afterwards.
 
 ## Notes
 
