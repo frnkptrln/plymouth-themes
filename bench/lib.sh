@@ -98,6 +98,9 @@ bench_stage() {   # bench_stage NAME: copy themes/NAME to /run/plymouth/themes/N
   touch "$dst/.bench"
   STAGED+=("$dst")
   sed -i "s#/usr/share/plymouth/themes/$n#$dst#g" "$dst/$n.plymouth"
+  if [ "$n" = readback ] && [ -n "${READBACK_NAME:-}" ]; then
+    sed -i "s/^MACHINE = \"[^\"]*\";/MACHINE = \"$READBACK_NAME\";/" "$dst/readback.script"
+  fi
   if [ "$n" = pedro-raccoon-luks ] && [ ! -f "$dst/animation-1.png" ]; then
     if [ -f "$PEDRO_ORIG/animation-198.png" ]; then
       cp "$PEDRO_ORIG"/animation-*.png "$dst"/
@@ -142,6 +145,18 @@ bench_quit() {   # ask plymouthd to quit; returns 1 if it had to be killed
   wait "$PLY_PID" 2>/dev/null
   PLY_PID=""
   return $rc
+}
+
+bench_units() {   # bench_units SECTION [pause]: send one section of units.txt as status updates
+  local sec="$1" pause="${2:-0.03}" on=0 line
+  while IFS= read -r line; do
+    case "$line" in
+      "# $sec:"*) on=1 ;;
+      "#"*) on=0 ;;
+      "") ;;
+      *) if [ "$on" = 1 ]; then plymouth update --status="$line"; sleep "$pause"; fi ;;
+    esac
+  done <"$BENCH/units.txt"
 }
 
 bench_focus() {   # keyboard focus to the plymouth window

@@ -3,6 +3,7 @@
 #
 #   sudo ./install.sh fireflies              install, activate, rebuild the initramfs
 #   sudo ./install.sh eca --no-rebuild       install and activate only
+#   sudo ./install.sh readback --name t14    the name readback spells (default: the hostname)
 #   sudo ./install.sh --use spinner          switch to another, already installed theme
 #   ./install.sh --check                     only check hooks and kernel parameters
 #   ./install.sh --list                      themes in this repository
@@ -104,7 +105,7 @@ rebuild() {
 }
 
 usage() {
-  say "usage:  sudo $0 <theme> [--no-rebuild]  |  sudo $0 --use <installed-theme>  |  $0 --check | --list"
+  say "usage:  sudo $0 <theme> [--no-rebuild] [--name NAME]  |  sudo $0 --use <installed-theme>  |  $0 --check | --list"
   say "themes: ${THEMES[*]}"
 }
 
@@ -124,7 +125,17 @@ esac
 
 THEME="$1"; shift
 NOREBUILD=0
-[ "${1:-}" = "--no-rebuild" ] && NOREBUILD=1
+MACHINE_NAME=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --no-rebuild) NOREBUILD=1 ;;
+    --name)
+      [ $# -ge 2 ] || { say "--name needs a value"; exit 1; }
+      MACHINE_NAME="$2"; shift ;;
+    *) say "Unknown option: $1"; usage; exit 1 ;;
+  esac
+  shift
+done
 
 if [ ! -f "$SRC/$THEME/$THEME.plymouth" ]; then
   say "Unknown theme: $THEME"; usage; exit 1
@@ -162,6 +173,17 @@ find "$DEST/$THEME" -maxdepth 1 -type f -print0 | while IFS= read -r -d '' f; do
   rm -f "$f"; say "  removed (old): $b"
 done
 ok "$(find "$DEST/$THEME" -type f | wc -l) files"
+
+# readback spells this machine's name; the copy in themes/ says "localhost"
+if [ "$THEME" = readback ]; then
+  if [ -z "$MACHINE_NAME" ]; then
+    MACHINE_NAME="$(hostnamectl --static 2>/dev/null || cat /etc/hostname 2>/dev/null || uname -n)"
+  fi
+  MACHINE_NAME="$(printf '%s\n' "$MACHINE_NAME" | head -n1 | cut -d. -f1 | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-' | cut -c1-32)"
+  [ -n "$MACHINE_NAME" ] || MACHINE_NAME=localhost
+  sed -i "s/^MACHINE = \"[^\"]*\";/MACHINE = \"$MACHINE_NAME\";/" "$DEST/$THEME/$THEME.script"
+  ok "the name on the screen: $MACHINE_NAME"
+fi
 
 PREV="$(plymouth-set-default-theme 2>/dev/null || true)"
 plymouth-set-default-theme "$THEME"

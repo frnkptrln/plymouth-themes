@@ -169,27 +169,33 @@ def lib_script():
 # Latin Modern Mono atlases, shared by the themes that print in it
 # ---------------------------------------------------------------------------
 LM_SIZES = (14, 17, 20, 24, 28, 34, 40)
-LM_CANDIDATES = [
-    "/usr/share/fonts/OTF/lmmono10-regular.otf",                               # Arch
-    "/usr/share/fonts/opentype/lm/lmmono10-regular.otf",
-    "/usr/share/texmf/fonts/opentype/public/lm/lmmono10-regular.otf",          # Debian, Ubuntu
-    "/usr/share/texmf-dist/fonts/opentype/public/lm/lmmono10-regular.otf",
-    "/usr/local/texlive/*/texmf-dist/fonts/opentype/public/lm/lmmono10-regular.otf",
+LM_DIRS = [
+    "/usr/share/fonts/OTF",                                  # Arch
+    "/usr/share/fonts/opentype/lm",
+    "/usr/share/texmf/fonts/opentype/public/lm",             # Debian, Ubuntu
+    "/usr/share/texmf-dist/fonts/opentype/public/lm",
+    "/usr/local/texlive/*/texmf-dist/fonts/opentype/public/lm",
 ]
+
+
+def lm_file(name, env=None):
+    """Path of a Latin Modern font file, e.g. lmmono10-regular.otf; the
+    environment variable env, if given and set, overrides the search."""
+    import glob
+    import os
+    if env and os.environ.get(env):
+        return os.environ[env]
+    for d in LM_DIRS:
+        found = sorted(glob.glob(os.path.join(d, name)))
+        if found:
+            return found[-1]
+    hint = " or set %s=/path/to/%s" % (env, name) if env else ""
+    raise SystemExit("%s not found (Arch: otf-latin-modern, Debian/Ubuntu: fonts-lmodern%s)" % (name, hint))
 
 
 def lm_font():
     """Path of Latin Modern Mono 10 Regular; LMMONO=<path> overrides the search."""
-    import glob
-    import os
-    if os.environ.get("LMMONO"):
-        return os.environ["LMMONO"]
-    for pattern in LM_CANDIDATES:
-        found = sorted(glob.glob(pattern))
-        if found:
-            return found[-1]
-    raise SystemExit("Latin Modern Mono not found (Arch: otf-latin-modern, Debian/Ubuntu: fonts-lmodern; "
-                     "or set LMMONO=/path/to/lmmono10-regular.otf)")
+    return lm_file("lmmono10-regular.otf", "LMMONO")
 
 
 def lm_fonts(out, colors, bg, sizes=LM_SIZES):

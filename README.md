@@ -2,12 +2,12 @@
 
 Custom Plymouth boot themes. Small scenes for the moments before everything begins.
 
-Thirteen boot splashes for [Plymouth](https://gitlab.freedesktop.org/plymouth/plymouth),
+Fourteen boot splashes for [Plymouth](https://gitlab.freedesktop.org/plymouth/plymouth),
 made for machines with an encrypted disk. Each theme draws the LUKS passphrase
 prompt itself and reacts to what you type: a wrong passphrase scrambles a
 cellular automaton, startles a swarm of fireflies or sends a cosmic-ray shower
-through a cloud chamber. They work just as well without encryption, and twelve
-of them have a screen of their own for power-off and reboot.
+through a cloud chamber. They work just as well without encryption, and
+thirteen of them have a screen of their own for power-off and reboot.
 
 Everything is computed while the machine boots, by Plymouth's script plugin;
 only `pedro-raccoon-luks` plays a pre-drawn animation. All text comes from
@@ -41,7 +41,7 @@ Plymouth's label plugin being in the initramfs.
 </tr>
 <tr>
 <td><img src="previews/busy-beaver.gif" alt="busy-beaver"><br><b>busy-beaver</b> · the five-state champion, running live</td>
-<td></td>
+<td><img src="previews/readback.gif" alt="readback"><br><b>readback</b> · the boot, written into the machine's name</td>
 </tr>
 </table>
 
@@ -124,6 +124,17 @@ steps, which at boot speed takes well over an hour. It ignores your typing; a
 wrong passphrase sends it back to step 0, and at power-off it says how many
 steps it was short of halting.
 
+**readback.** Nothing on this screen is made up. Before the passphrase it is
+a field of noise, standing in for what the encrypted disk is without its key.
+systemd reports every unit it has started to Plymouth by name, and readback
+writes those names, in that order, into the letters of the machine's name,
+until the name stands there made of the names of its own parts; what no longer
+fits runs on, dimmer, into the noise. Of the passphrase it shows what Plymouth
+tells a theme, the number of characters, and says that this is all it sees. At
+power-off nothing is reported any more, and the name is only an outline.
+`install.sh` writes the hostname into the theme (`--name` sets another one);
+the copy in `themes/` says `localhost`, and so does the preview.
+
 ## Install
 
 ```sh
@@ -194,13 +205,13 @@ theme is put back afterwards.
 
   | theme | CPU | theme | CPU |
   |---|---:|---|---:|
-  | robi-386 | 5 % | waterfall | 15 % |
-  | pedro-raccoon-luks | 7 % | fireflies | 17 % |
-  | cloud-chamber | 8 % | sandpile | 17 % |
+  | robi-386 | 5 % | busy-beaver | 13 % |
+  | pedro-raccoon-luks | 7 % | waterfall | 15 % |
+  | cloud-chamber | 8 % | fireflies | 17 % |
+  | readback | 9 % | sandpile | 17 % |
   | langtons-ant | 10 % | epicycles | 22 % |
   | eca | 11 % | oscilloscope | 26 % |
   | hilbert | 12 % | trisolaris | 29 % |
-  | busy-beaver | 13 % | | |
 
   At 3840 × 2160 with `DeviceScale=1` the heavy ones need about twice as
   much (trisolaris 60 %, oscilloscope 50 %); robi-386 stays at 5 %.
@@ -218,8 +229,9 @@ python3 src/build.py fireflies eca             # only these
 python3 src/build.py --list
 ```
 
-The build needs Latin Modern Mono (Arch: `otf-latin-modern`, Debian/Ubuntu:
-`fonts-lmodern`, or `LMMONO=/path/to/lmmono10-regular.otf`). It is
+The build needs Latin Modern Mono and Latin Modern Sans Bold (Arch:
+`otf-latin-modern`, Debian/Ubuntu: `fonts-lmodern`; or point `LMMONO` and
+`LMSANSBOLD` at `lmmono10-regular.otf` and `lmsans10-bold.otf`). It is
 deterministic: with the Pillow version from `requirements.txt` it reproduces
 `themes/` byte for byte, which CI checks. Other Pillow versions give the same
 themes with slightly different PNG files.
@@ -230,6 +242,8 @@ themes with slightly different PNG files.
 `xdotool`, so a theme can be typed into, recorded and timed without
 rebooting. It needs root, Plymouth's x11 renderer (Debian/Ubuntu:
 `plymouth-x11`), Xvfb, xdotool and ImageMagick, and ffmpeg for recordings.
+It sends the unit names a typical boot reports (`bench/units.txt`) as status
+updates, the way systemd does.
 Themes are staged into `/run/plymouth/themes` and chosen with
 `plymouth.splash=` on the command line handed to plymouthd, so nothing under
 `/etc` or `/usr` changes; it is still meant for a container or a VM.
@@ -255,7 +269,8 @@ exceptions:
   GPL-2.0 (`LICENSES/GPL-2.0.txt`); so are the bitmap font atlases rendered
   from it in `robi-386`, `oscilloscope` and `pedro-raccoon-luks`.
 - The font atlases of the other themes are rendered from Latin Modern Mono by
-  B. Jackowski and J. M. Nowacki, under the GUST Font License
+  B. Jackowski and J. M. Nowacki, and readback's big letters are sampled from
+  Latin Modern Sans Bold by the same authors, under the GUST Font License
   (`LICENSES/GUST-FONT-LICENSE.txt`).
 - The Pedro Raccoon animation belongs to the author of
   [Pedro Raccoon Plymouth](https://www.opendesktop.org/p/2148515) and is not

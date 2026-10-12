@@ -65,7 +65,8 @@ run_luks() {   # run_luks DIR THEME
   local d="$1"
   bench_plymouthd "$2" "$d/ply.log" || { fail "plymouthd did not start"; return; }
   plymouth show-splash
-  sleep 1.5
+  bench_units initrd 0.02
+  sleep 1.3
   bench_shot "$d/1-boot.png"
   plymouth display-message --text="Starting systemd-cryptsetup@root.service"
   sleep 0.5
@@ -81,10 +82,15 @@ run_luks() {   # run_luks DIR THEME
   xdotool key BackSpace; sleep 0.1; xdotool key BackSpace
   xdotool type --delay 60 "se"; sleep 0.4
   bench_shot "$d/3-retry.png"
-  xdotool key Return; sleep 1.0
+  xdotool key Return; sleep 0.5
+  bench_units unlock 0.02
+  bench_units system 0.01 &
+  local feeder=$!
+  sleep 0.5
   ask question "$d/q.txt" "Continue booting? [y/N]"
   sleep 0.6; bench_focus
-  xdotool type --delay 60 "y"; xdotool key Return; sleep 1.5
+  xdotool type --delay 60 "y"; xdotool key Return
+  wait "$feeder"; sleep 1.5
   bench_shot "$d/4-late.png"
   plymouth --ping 2>/dev/null || fail "plymouthd died"
   bench_quit || fail "plymouthd did not quit"
@@ -101,7 +107,9 @@ run_simple() {   # run_simple DIR THEME MODE
   [ "$3" = reboot ] && args=(--mode=reboot)
   bench_plymouthd "$2" "$d/ply.log" "${args[@]}" || { fail "plymouthd did not start"; return; }
   plymouth show-splash
-  sleep 1.5; bench_shot "$d/1-early.png"
+  if [ "$3" = plain ]; then bench_units initrd 0.02; bench_units unlock 0.02; fi
+  sleep 1.0; bench_shot "$d/1-early.png"
+  [ "$3" = plain ] && bench_units system 0.01
   sleep 2.5; bench_shot "$d/2-later.png"
   plymouth --ping 2>/dev/null || fail "plymouthd died"
   bench_quit || fail "plymouthd did not quit"

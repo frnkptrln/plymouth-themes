@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Readback
+Description=The boot written down: the units systemd starts fill the letters of the machine's name, in a field of noise
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/readback
+ScriptFile=/usr/share/plymouth/themes/readback/readback.script

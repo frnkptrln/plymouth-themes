@@ -32,7 +32,8 @@ plymouth show-splash
 
 case "$MODE" in
   luks)
-    sleep 1.2
+    bench_units initrd 0.1
+    sleep 0.2
     plymouth ask-for-password --prompt="$PROMPT_TEXT" >"$OUT/answer1.txt" 2>&1 &
     sleep 2.2; bench_focus
     bench_type_slowly "geheim"; sleep 0.4; xdotool key Return
@@ -42,9 +43,18 @@ case "$MODE" in
     bench_type_slowly "korrekt-pferd"; sleep 0.2
     xdotool key BackSpace; sleep 0.3; xdotool key BackSpace; sleep 0.3
     bench_type_slowly "rd"; sleep 0.5; xdotool key Return
-    sleep 6
+    sleep 0.3
+    bench_units unlock 0.06
+    bench_units system 0.04
+    sleep 2.5
     ;;
-  plain) sleep 9 ;;
+  plain)
+    sleep 0.5
+    bench_units initrd 0.1
+    bench_units unlock 0.06
+    bench_units system 0.05
+    sleep 3
+    ;;
   shutdown|reboot) sleep 5 ;;
   *) echo "unknown mode: $MODE" >&2; exit 2 ;;
 esac

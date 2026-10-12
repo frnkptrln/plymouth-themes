@@ -1,0 +1,1264 @@
+# =============================================================================
+#  READBACK — the boot, written down.
+#
+#  Nothing on this screen is made up. Before the passphrase the screen is
+#  noise: that is what an encrypted disk is without its key (the noise only
+#  stands in for it, Plymouth cannot read the disk). Every unit systemd has
+#  started is reported to Plymouth by name, and the names are written, in
+#  that order, into the letters of this machine's name, until the name stands
+#  there made of the names of its own parts. What no longer fits runs on,
+#  dimmer, into the noise; whatever is still noise at the end, this boot did
+#  not need. Of your passphrase the theme learns only how many characters you
+#  typed, and says so. At power-off nothing is reported any more, and the name
+#  is only an outline in the noise.
+#
+#  Claude, October 2026 — for Frank
+# =============================================================================
+
+Window.SetBackgroundTopColor(0.049020, 0.045098, 0.041176);
+Window.SetBackgroundBottomColor(0.049020, 0.045098, 0.041176);
+
+SW = Window.GetWidth();
+SH = Window.GetHeight();
+SX = Window.GetX();
+SY = Window.GetY();
+
+#==============================================================================
+# glyph text engine — bitmap font from PNG atlases (IBM VGA 8x16, CP437)
+#==============================================================================
+TXT.ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+for (TXT.i = 0; TXT.i < 95; TXT.i++) TXT.ord[TXT.ascii.CharAt(TXT.i)] = 32 + TXT.i;
+TXT.u8["☺"] = 1;
+TXT.u8["☻"] = 2;
+TXT.u8["♥"] = 3;
+TXT.u8["♦"] = 4;
+TXT.u8["♣"] = 5;
+TXT.u8["♠"] = 6;
+TXT.u8["•"] = 7;
+TXT.u8["◘"] = 8;
+TXT.u8["○"] = 9;
+TXT.u8["◙"] = 10;
+TXT.u8["♂"] = 11;
+TXT.u8["♀"] = 12;
+TXT.u8["♪"] = 13;
+TXT.u8["♫"] = 14;
+TXT.u8["☼"] = 15;
+TXT.u8["►"] = 16;
+TXT.u8["◄"] = 17;
+TXT.u8["↕"] = 18;
+TXT.u8["‼"] = 19;
+TXT.u8["¶"] = 20;
+TXT.u8["§"] = 21;
+TXT.u8["▬"] = 22;
+TXT.u8["↨"] = 23;
+TXT.u8["↑"] = 24;
+TXT.u8["↓"] = 25;
+TXT.u8["→"] = 26;
+TXT.u8["←"] = 27;
+TXT.u8["∟"] = 28;
+TXT.u8["↔"] = 29;
+TXT.u8["▲"] = 30;
+TXT.u8["▼"] = 31;
+TXT.u8["⌂"] = 127;
+TXT.u8["Ç"] = 128;
+TXT.u8["ü"] = 129;
+TXT.u8["é"] = 130;
+TXT.u8["â"] = 131;
+TXT.u8["ä"] = 132;
+TXT.u8["à"] = 133;
+TXT.u8["å"] = 134;
+TXT.u8["ç"] = 135;
+TXT.u8["ê"] = 136;
+TXT.u8["ë"] = 137;
+TXT.u8["è"] = 138;
+TXT.u8["ï"] = 139;
+TXT.u8["î"] = 140;
+TXT.u8["ì"] = 141;
+TXT.u8["Ä"] = 142;
+TXT.u8["Å"] = 143;
+TXT.u8["É"] = 144;
+TXT.u8["æ"] = 145;
+TXT.u8["Æ"] = 146;
+TXT.u8["ô"] = 147;
+TXT.u8["ö"] = 148;
+TXT.u8["ò"] = 149;
+TXT.u8["û"] = 150;
+TXT.u8["ù"] = 151;
+TXT.u8["ÿ"] = 152;
+TXT.u8["Ö"] = 153;
+TXT.u8["Ü"] = 154;
+TXT.u8["¢"] = 155;
+TXT.u8["£"] = 156;
+TXT.u8["¥"] = 157;
+TXT.u8["₧"] = 158;
+TXT.u8["ƒ"] = 159;
+TXT.u8["á"] = 160;
+TXT.u8["í"] = 161;
+TXT.u8["ó"] = 162;
+TXT.u8["ú"] = 163;
+TXT.u8["ñ"] = 164;
+TXT.u8["Ñ"] = 165;
+TXT.u8["ª"] = 166;
+TXT.u8["º"] = 167;
+TXT.u8["¿"] = 168;
+TXT.u8["⌐"] = 169;
+TXT.u8["¬"] = 170;
+TXT.u8["½"] = 171;
+TXT.u8["¼"] = 172;
+TXT.u8["¡"] = 173;
+TXT.u8["«"] = 174;
+TXT.u8["»"] = 175;
+TXT.u8["░"] = 176;
+TXT.u8["▒"] = 177;
+TXT.u8["▓"] = 178;
+TXT.u8["│"] = 179;
+TXT.u8["┤"] = 180;
+TXT.u8["╡"] = 181;
+TXT.u8["╢"] = 182;
+TXT.u8["╖"] = 183;
+TXT.u8["╕"] = 184;
+TXT.u8["╣"] = 185;
+TXT.u8["║"] = 186;
+TXT.u8["╗"] = 187;
+TXT.u8["╝"] = 188;
+TXT.u8["╜"] = 189;
+TXT.u8["╛"] = 190;
+TXT.u8["┐"] = 191;
+TXT.u8["└"] = 192;
+TXT.u8["┴"] = 193;
+TXT.u8["┬"] = 194;
+TXT.u8["├"] = 195;
+TXT.u8["─"] = 196;
+TXT.u8["┼"] = 197;
+TXT.u8["╞"] = 198;
+TXT.u8["╟"] = 199;
+TXT.u8["╚"] = 200;
+TXT.u8["╔"] = 201;
+TXT.u8["╩"] = 202;
+TXT.u8["╦"] = 203;
+TXT.u8["╠"] = 204;
+TXT.u8["═"] = 205;
+TXT.u8["╬"] = 206;
+TXT.u8["╧"] = 207;
+TXT.u8["╨"] = 208;
+TXT.u8["╤"] = 209;
+TXT.u8["╥"] = 210;
+TXT.u8["╙"] = 211;
+TXT.u8["╘"] = 212;
+TXT.u8["╒"] = 213;
+TXT.u8["╓"] = 214;
+TXT.u8["╫"] = 215;
+TXT.u8["╪"] = 216;
+TXT.u8["┘"] = 217;
+TXT.u8["┌"] = 218;
+TXT.u8["█"] = 219;
+TXT.u8["▄"] = 220;
+TXT.u8["▌"] = 221;
+TXT.u8["▐"] = 222;
+TXT.u8["▀"] = 223;
+TXT.u8["α"] = 224;
+TXT.u8["ß"] = 225;
+TXT.u8["Γ"] = 226;
+TXT.u8["π"] = 227;
+TXT.u8["Σ"] = 228;
+TXT.u8["σ"] = 229;
+TXT.u8["µ"] = 230;
+TXT.u8["τ"] = 231;
+TXT.u8["Φ"] = 232;
+TXT.u8["Θ"] = 233;
+TXT.u8["Ω"] = 234;
+TXT.u8["δ"] = 235;
+TXT.u8["∞"] = 236;
+TXT.u8["φ"] = 237;
+TXT.u8["ε"] = 238;
+TXT.u8["∩"] = 239;
+TXT.u8["≡"] = 240;
+TXT.u8["±"] = 241;
+TXT.u8["≥"] = 242;
+TXT.u8["≤"] = 243;
+TXT.u8["⌠"] = 244;
+TXT.u8["⌡"] = 245;
+TXT.u8["÷"] = 246;
+TXT.u8["≈"] = 247;
+TXT.u8["°"] = 248;
+TXT.u8["∙"] = 249;
+TXT.u8["·"] = 250;
+TXT.u8["√"] = 251;
+TXT.u8["ⁿ"] = 252;
+TXT.u8["²"] = 253;
+TXT.u8["■"] = 254;
+TXT.u8[" "] = 255;
+
+# Turn a string into an array of CP437 codes (out.n = length). out.off[k] is
+# the byte offset where glyph k starts, out.off[out.n] the length in bytes:
+# Plymouth's string functions count bytes, and "•" alone is three of them.
+fun txt_codes(s) {
+    local.out.n = 0;
+    local.i = 0;
+    local.k = 0;
+    local.c = s.CharAt(0);
+    while (c != "") {
+        out.off[out.n] = i;
+        k = TXT.ord[c];
+        if (k) { out[out.n] = k; out.n++; i++; }
+        else {
+            k = TXT.u8[s.SubString(i, i + 3)];
+            if (k) { out[out.n] = k; out.n++; i += 3; }
+            else {
+                k = TXT.u8[s.SubString(i, i + 2)];
+                if (k) { out[out.n] = k; out.n++; i += 2; }
+                else { out[out.n] = 63; out.n++; i++; }
+            }
+        }
+        c = s.CharAt(i);
+    }
+    out.off[out.n] = i;
+    return out;
+}
+
+# Number of glyphs a string renders to.
+fun txt_len(s) {
+    local.c = txt_codes(s);
+    return c.n;
+}
+
+# Load a font atlas. fid: short id, file: atlas PNG, cw/ch: atlas cell size,
+# adv: horizontal advance, lh: line height, pad: glow margin around each glyph.
+FONT.count = 0;     # must exist at top level so functions see the globals
+GLYPH.count = 0;
+
+fun font_load(fid, file, cw, ch, adv, lh, pad) {
+    global.FONT[fid].atlas = Image(file);
+    global.FONT[fid].cw = cw;
+    global.FONT[fid].ch = ch;
+    global.FONT[fid].adv = adv;
+    global.FONT[fid].lh = lh;
+    global.FONT[fid].pad = pad;
+}
+
+fun glyph(fid, code) {
+    if (!GLYPH[fid][code])
+        global.GLYPH[fid][code] = FONT[fid].atlas.Crop((code % 16) * FONT[fid].cw,
+                                                Math.Int(code / 16) * FONT[fid].ch,
+                                                FONT[fid].cw, FONT[fid].ch);
+    return GLYPH[fid][code];
+}
+
+# Create sprites for a string at (x, y). Returns a run object; drop it to erase.
+fun txt_run(fid, s, x, y, z) {
+    local.codes = txt_codes(s);
+    local.r.n = codes.n;
+    local.r.w = codes.n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < codes.n; i++) {
+        if (codes[i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+# Same, from an already decoded code array (from index a, count n).
+fun txt_run_codes(fid, codes, a, n, x, y, z) {
+    local.r.n = n;
+    local.r.w = n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < n; i++) {
+        if (codes[a + i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[a + i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+fun run_opacity(r, o) {
+    local.i = 0;
+    for (i = 0; i < r.n; i++) if (r.sp[i]) r.sp[i].SetOpacity(o);
+}
+
+fun run_move(r, x, y) {
+    local.i = 0;
+    local.fid = 0;
+    for (i = 0; i < r.n; i++)
+        if (r.sp[i]) r.sp[i].SetPosition(x + (r.sp[i].GetX() - r.x), y + (r.sp[i].GetY() - r.y), r.sp[i].GetZ());
+    r.x = x;
+    r.y = y;
+}
+
+# Shorten s to at most n glyphs by cutting out the middle, at glyph
+# boundaries, so a multi-byte character is never split.
+fun txt_fit(s, n) {
+    local.c = txt_codes(s);
+    local.h = 0;
+    if (c.n <= n) return s;
+    if (n < 5) return s.SubString(0, c.off[n]);
+    h = Math.Int((n - 3) / 2);
+    return s.SubString(0, c.off[h]) + "..." + s.SubString(c.off[c.n - (n - 3 - h)], c.off[c.n]);
+}
+
+# Uniform random number in [0, 1). Plymouth 24's Math.Random() returns values
+# scaled down by 2^32; normalise so this also works if that ever gets fixed.
+fun rnd() {
+    local.r = Math.Random();
+    if (r < 0.000001) r = r * 4294967296;
+    return r - Math.Int(r);
+}
+
+# Pick the largest integer scale (from 1..maxs) at which a cols x rows grid of
+# (cw x lh) cells still fits into w x h.
+fun pick_scale(w, h, cw, lh, cols, rows, maxs) {
+    local.s = maxs;
+    while (s > 1 && (cols * cw * s > w || rows * lh * s > h)) s--;
+    return s;
+}
+
+FSL[0] = 14; FSA[0] = 7; FSH[0] = 18;
+FSL[1] = 17; FSA[1] = 9; FSH[1] = 22;
+FSL[2] = 20; FSA[2] = 10; FSH[2] = 26;
+FSL[3] = 24; FSA[3] = 13; FSH[3] = 31;
+FSL[4] = 28; FSA[4] = 15; FSH[4] = 36;
+FSL[5] = 34; FSA[5] = 18; FSH[5] = 44;
+FSL[6] = 40; FSA[6] = 21; FSH[6] = 52;
+FSL.n = 7;
+NHL[0] = 6;
+GW[0]["a"] = 9; GT[0]["a"] = 1; GE[0]["a"] = 4; GB[0]["a"] = "001f1fcfe7f000";
+GW[0]["b"] = 10; GT[0]["b"] = 0; GE[0]["b"] = 4; GB[0]["b"] = "701fc779ce7f000";
+GW[0]["c"] = 9; GT[0]["c"] = 1; GE[0]["c"] = 4; GB[0]["c"] = "001f3cde07f000";
+GW[0]["d"] = 10; GT[0]["d"] = 0; GE[0]["d"] = 4; GB[0]["d"] = "038fef7bde7f800";
+GW[0]["e"] = 9; GT[0]["e"] = 1; GE[0]["e"] = 4; GB[0]["e"] = "001f3fdfe7f000";
+GW[0]["f"] = 6; GT[0]["f"] = 0; GE[0]["f"] = 4; GB[0]["f"] = "7de79c700";
+GW[0]["g"] = 10; GT[0]["g"] = 1; GE[0]["g"] = 5; GB[0]["g"] = "000feff1f87fbfe";
+GW[0]["h"] = 10; GT[0]["h"] = 0; GE[0]["h"] = 4; GB[0]["h"] = "701fc7f9de73800";
+GW[0]["i"] = 5; GT[0]["i"] = 0; GE[0]["i"] = 4; GB[0]["i"] = "739ce700";
+GW[0]["j"] = 6; GT[0]["j"] = 0; GE[0]["j"] = 5; GB[0]["j"] = "71c79e7bc";
+GW[0]["k"] = 9; GT[0]["k"] = 0; GE[0]["k"] = 4; GB[0]["k"] = "703b9f8fc77800";
+GW[0]["l"] = 5; GT[0]["l"] = 0; GE[0]["l"] = 4; GB[0]["l"] = "739ce700";
+GW[0]["m"] = 15; GT[0]["m"] = 1; GE[0]["m"] = 4; GB[0]["m"] = "0000fef1fff3bde73bc0000";
+GW[0]["n"] = 10; GT[0]["n"] = 1; GE[0]["n"] = 4; GB[0]["n"] = "001fc7f9de73800";
+GW[0]["o"] = 10; GT[0]["o"] = 1; GE[0]["o"] = 4; GB[0]["o"] = "000f8f7bce7f000";
+GW[0]["p"] = 10; GT[0]["p"] = 1; GE[0]["p"] = 5; GB[0]["p"] = "001fc7f9ce7f1c0";
+GW[0]["q"] = 10; GT[0]["q"] = 1; GE[0]["q"] = 5; GB[0]["q"] = "000feffbde7f81e";
+GW[0]["r"] = 7; GT[0]["r"] = 1; GE[0]["r"] = 4; GB[0]["r"] = "00f9f387000";
+GW[0]["s"] = 8; GT[0]["s"] = 1; GE[0]["s"] = 4; GB[0]["s"] = "007cfe7efe00";
+GW[0]["t"] = 7; GT[0]["t"] = 1; GE[0]["t"] = 4; GB[0]["t"] = "00f9f387e00";
+GW[0]["u"] = 10; GT[0]["u"] = 1; GE[0]["u"] = 4; GB[0]["u"] = "001cc779de7f800";
+GW[0]["v"] = 9; GT[0]["v"] = 1; GE[0]["v"] = 4; GB[0]["v"] = "0031bdcfc3c000";
+GW[0]["w"] = 13; GT[0]["w"] = 1; GE[0]["w"] = 4; GB[0]["w"] = "000331bfdcffc3be0000";
+GW[0]["x"] = 9; GT[0]["x"] = 1; GE[0]["x"] = 4; GB[0]["x"] = "00339f87cf7000";
+GW[0]["y"] = 9; GT[0]["y"] = 1; GE[0]["y"] = 5; GB[0]["y"] = "00319dc7c1c7c0";
+GW[0]["z"] = 9; GT[0]["z"] = 1; GE[0]["z"] = 4; GB[0]["z"] = "003f1f8f8ff000";
+GW[0]["0"] = 10; GT[0]["0"] = 0; GE[0]["0"] = 4; GB[0]["0"] = "7f3def39de7f000";
+GW[0]["1"] = 10; GT[0]["1"] = 0; GE[0]["1"] = 4; GB[0]["1"] = "7e0781e0787f000";
+GW[0]["2"] = 10; GT[0]["2"] = 0; GE[0]["2"] = 4; GB[0]["2"] = "7f19e0f0f07f800";
+GW[0]["3"] = 10; GT[0]["3"] = 0; GE[0]["3"] = 4; GB[0]["3"] = "7f01c1f11e7f000";
+GW[0]["4"] = 10; GT[0]["4"] = 0; GE[0]["4"] = 4; GB[0]["4"] = "1f0fc7f3fe07000";
+GW[0]["5"] = 10; GT[0]["5"] = 0; GE[0]["5"] = 4; GB[0]["5"] = "7f1f87f99e7f000";
+GW[0]["6"] = 10; GT[0]["6"] = 0; GE[0]["6"] = 4; GB[0]["6"] = "3f1fcf79de3f000";
+GW[0]["7"] = 10; GT[0]["7"] = 0; GE[0]["7"] = 4; GB[0]["7"] = "ff83c1c0f038000";
+GW[0]["8"] = 10; GT[0]["8"] = 0; GE[0]["8"] = 4; GB[0]["8"] = "7f1de7f3de7f000";
+GW[0]["9"] = 10; GT[0]["9"] = 0; GE[0]["9"] = 4; GB[0]["9"] = "7f3de7f8fe7f000";
+GW[0]["-"] = 7; GT[0]["-"] = 3; GE[0]["-"] = 3; GB[0]["-"] = "000007c0000";
+NHL[1] = 7;
+GW[1]["a"] = 11; GT[1]["a"] = 2; GE[1]["a"] = 5; GB[1]["a"] = "000001fe3fefbcff0000";
+GW[1]["b"] = 11; GT[1]["b"] = 0; GE[1]["b"] = 5; GB[1]["b"] = "700f01ff3cf7bcff0000";
+GW[1]["c"] = 10; GT[1]["c"] = 2; GE[1]["c"] = 5; GB[1]["c"] = "000007fbc0798fe000";
+GW[1]["d"] = 11; GT[1]["d"] = 0; GE[1]["d"] = 5; GB[1]["d"] = "01c079ff79e7bc7f8000";
+GW[1]["e"] = 10; GT[1]["e"] = 2; GE[1]["e"] = 5; GB[1]["e"] = "000007fbff798fe000";
+GW[1]["f"] = 7; GT[1]["f"] = 0; GE[1]["f"] = 5; GB[1]["f"] = "3ef3f3c787000";
+GW[1]["g"] = 11; GT[1]["g"] = 2; GE[1]["g"] = 6; GB[1]["g"] = "000001ffbfc7f9ff9ff0";
+GW[1]["h"] = 11; GT[1]["h"] = 0; GE[1]["h"] = 5; GB[1]["h"] = "700f01ff3de7bce38000";
+GW[1]["i"] = 6; GT[1]["i"] = 0; GE[1]["i"] = 5; GB[1]["i"] = "79c79e79c00";
+GW[1]["j"] = 6; GT[1]["j"] = 0; GE[1]["j"] = 6; GB[1]["j"] = "78e79e79ef8";
+GW[1]["k"] = 11; GT[1]["k"] = 0; GE[1]["k"] = 5; GB[1]["k"] = "700e01fe3f07f8e78000";
+GW[1]["l"] = 6; GT[1]["l"] = 0; GE[1]["l"] = 5; GB[1]["l"] = "71e79e79c00";
+GW[1]["m"] = 17; GT[1]["m"] = 2; GE[1]["m"] = 5; GB[1]["m"] = "000000001fffcf79e7bcf38e780000";
+GW[1]["n"] = 11; GT[1]["n"] = 2; GE[1]["n"] = 5; GB[1]["n"] = "000001ff3de7bce38000";
+GW[1]["o"] = 11; GT[1]["o"] = 2; GE[1]["o"] = 5; GB[1]["o"] = "000001ff78ffbc7f0000";
+GW[1]["p"] = 11; GT[1]["p"] = 2; GE[1]["p"] = 6; GB[1]["p"] = "000001ff3cf7bcff1e00";
+GW[1]["q"] = 11; GT[1]["q"] = 2; GE[1]["q"] = 6; GB[1]["q"] = "000001ff79e7bc7f80f0";
+GW[1]["r"] = 8; GT[1]["r"] = 2; GE[1]["r"] = 5; GB[1]["r"] = "00007e78787000";
+GW[1]["s"] = 9; GT[1]["s"] = 2; GE[1]["s"] = 5; GB[1]["s"] = "00001fcfc7f3f000";
+GW[1]["t"] = 8; GT[1]["t"] = 1; GE[1]["t"] = 5; GB[1]["t"] = "0078fe787a3e00";
+GW[1]["u"] = 11; GT[1]["u"] = 2; GE[1]["u"] = 5; GB[1]["u"] = "000001ef3de7bc7f8000";
+GW[1]["v"] = 10; GT[1]["v"] = 2; GE[1]["v"] = 5; GB[1]["v"] = "00000f3dfe3f078000";
+GW[1]["w"] = 15; GT[1]["w"] = 2; GE[1]["w"] = 5; GB[1]["w"] = "00000003def3ffc3ff879e00000";
+GW[1]["x"] = 10; GT[1]["x"] = 2; GE[1]["x"] = 5; GB[1]["x"] = "000007f8f87fbce000";
+GW[1]["y"] = 10; GT[1]["y"] = 2; GE[1]["y"] = 6; GB[1]["y"] = "00000f3dfe1f038fc0";
+GW[1]["z"] = 10; GT[1]["z"] = 2; GE[1]["z"] = 5; GB[1]["z"] = "000007f8787c1fe000";
+GW[1]["0"] = 11; GT[1]["0"] = 0; GE[1]["0"] = 5; GB[1]["0"] = "3f8e7bcf79e7bc7f0000";
+GW[1]["1"] = 11; GT[1]["1"] = 0; GE[1]["1"] = 5; GB[1]["1"] = "7e03e03c0781f07f0000";
+GW[1]["2"] = 11; GT[1]["2"] = 0; GE[1]["2"] = 5; GB[1]["2"] = "7f8e780f0787fcff8000";
+GW[1]["3"] = 11; GT[1]["3"] = 0; GE[1]["3"] = 5; GB[1]["3"] = "7f84787e01e73cff0000";
+GW[1]["4"] = 11; GT[1]["4"] = 0; GE[1]["4"] = 5; GB[1]["4"] = "0f83f0fe7fe7fc070000";
+GW[1]["5"] = 11; GT[1]["5"] = 0; GE[1]["5"] = 5; GB[1]["5"] = "7f8f01fe19e77c7e0000";
+GW[1]["6"] = 11; GT[1]["6"] = 0; GE[1]["6"] = 5; GB[1]["6"] = "3f8fc1ff3de7bc7f0000";
+GW[1]["7"] = 11; GT[1]["7"] = 0; GE[1]["7"] = 5; GB[1]["7"] = "7fc0f03c0f03c0380000";
+GW[1]["8"] = 11; GT[1]["8"] = 0; GE[1]["8"] = 5; GB[1]["8"] = "7f8f79fe3de7bc7f0000";
+GW[1]["9"] = 11; GT[1]["9"] = 0; GE[1]["9"] = 5; GB[1]["9"] = "7f8f79cf3fe37c7e0000";
+GW[1]["-"] = 8; GT[1]["-"] = 3; GE[1]["-"] = 3; GB[1]["-"] = "000000fc000000";
+NHL[2] = 8;
+GW[2]["a"] = 12; GT[2]["a"] = 2; GE[2]["a"] = 6; GB[2]["a"] = "0000003fc37e7fe7fe1cc000";
+GW[2]["b"] = 13; GT[2]["b"] = 0; GE[2]["b"] = 6; GB[2]["b"] = "7803c01ff8f1e78f3ff0de0000";
+GW[2]["c"] = 11; GT[2]["c"] = 2; GE[2]["c"] = 6; GB[2]["c"] = "000000ff3c2f80ffc3e000";
+GW[2]["d"] = 13; GT[2]["d"] = 0; GE[2]["d"] = 6; GB[2]["d"] = "01e00f8ffcf3ef9f3ff87b8000";
+GW[2]["e"] = 12; GT[2]["e"] = 2; GE[2]["e"] = 6; GB[2]["e"] = "0000003fcf9effe7fe0f8000";
+GW[2]["f"] = 8; GT[2]["f"] = 0; GE[2]["f"] = 6; GB[2]["f"] = "3f7cfe7c7c7c3800";
+GW[2]["g"] = 13; GT[2]["g"] = 2; GE[2]["g"] = 7; GB[2]["g"] = "0000001ffcf787fc3ff3ffcffe";
+GW[2]["h"] = 13; GT[2]["h"] = 0; GE[2]["h"] = 6; GB[2]["h"] = "7803c01ff8f3e79f3cf8c38000";
+GW[2]["i"] = 6; GT[2]["i"] = 0; GE[2]["i"] = 6; GB[2]["i"] = "79e79e79e300";
+GW[2]["j"] = 7; GT[2]["j"] = 0; GE[2]["j"] = 7; GB[2]["j"] = "7870f1e3c78f7c";
+GW[2]["k"] = 12; GT[2]["k"] = 0; GE[2]["k"] = 6; GB[2]["k"] = "7807807be7f87f87be30e000";
+GW[2]["l"] = 6; GT[2]["l"] = 0; GE[2]["l"] = 6; GB[2]["l"] = "79e79e79e300";
+GW[2]["m"] = 19; GT[2]["m"] = 2; GE[2]["m"] = 6; GB[2]["m"] = "0000000001ffff3cf9e79f3cf3e78c38600000";
+GW[2]["n"] = 13; GT[2]["n"] = 2; GE[2]["n"] = 6; GB[2]["n"] = "0000001ff8f3e79f3cf8c38000";
+GW[2]["o"] = 13; GT[2]["o"] = 2; GE[2]["o"] = 6; GB[2]["o"] = "0000000ff8f1ef8f3ff03e0000";
+GW[2]["p"] = 13; GT[2]["p"] = 2; GE[2]["p"] = 7; GB[2]["p"] = "0000001ff8f3e78f3ff1fe0f00";
+GW[2]["q"] = 13; GT[2]["q"] = 2; GE[2]["q"] = 7; GB[2]["q"] = "0000000ff8f3ef9f3ff87fc03c";
+GW[2]["r"] = 9; GT[2]["r"] = 2; GE[2]["r"] = 6; GB[2]["r"] = "00001fcf8783c0c000";
+GW[2]["s"] = 10; GT[2]["s"] = 2; GE[2]["s"] = 6; GB[2]["s"] = "000007f9fc7fbfe3e000";
+GW[2]["t"] = 10; GT[2]["t"] = 1; GE[2]["t"] = 6; GB[2]["t"] = "000f0ff1f07c0fe1e000";
+GW[2]["u"] = 13; GT[2]["u"] = 2; GE[2]["u"] = 6; GB[2]["u"] = "0000001e78f3e79f3ff87b8000";
+GW[2]["v"] = 12; GT[2]["v"] = 2; GE[2]["v"] = 6; GB[2]["v"] = "000000f1e7bc3f83f80e0000";
+GW[2]["w"] = 17; GT[2]["w"] = 2; GE[2]["w"] = 6; GB[2]["w"] = "000000003cf3cf7de7ffe1f7e030e00000";
+GW[2]["x"] = 12; GT[2]["x"] = 2; GE[2]["x"] = 6; GB[2]["x"] = "0000007bc3f81f07bc60c000";
+GW[2]["y"] = 12; GT[2]["y"] = 2; GE[2]["y"] = 7; GB[2]["y"] = "000000f1e7bc3f81f00f0fe0";
+GW[2]["z"] = 11; GT[2]["z"] = 2; GE[2]["z"] = 6; GB[2]["z"] = "000001ff07c3e0ff9fe000";
+GW[2]["0"] = 13; GT[2]["0"] = 0; GE[2]["0"] = 6; GB[2]["0"] = "3fc3cf1e7cf3e79f3ff07e0000";
+GW[2]["1"] = 13; GT[2]["1"] = 0; GE[2]["1"] = 6; GB[2]["1"] = "3f01f803c01e00f01ff0ff0000";
+GW[2]["2"] = 13; GT[2]["2"] = 0; GE[2]["2"] = 6; GB[2]["2"] = "3fc38f00780f81e03ff0ff8000";
+GW[2]["3"] = 13; GT[2]["3"] = 0; GE[2]["3"] = 6; GB[2]["3"] = "7fc18f03f01fc01f3ff07e0000";
+GW[2]["4"] = 13; GT[2]["4"] = 0; GE[2]["4"] = 6; GB[2]["4"] = "07c07e0ff0f78fff01e0060000";
+GW[2]["5"] = 13; GT[2]["5"] = 0; GE[2]["5"] = 6; GB[2]["5"] = "7fe3e01ff073c21e3ff07e0000";
+GW[2]["6"] = 13; GT[2]["6"] = 0; GE[2]["6"] = 6; GB[2]["6"] = "3fc3e01ff8f3c79f1ff03e0000";
+GW[2]["7"] = 13; GT[2]["7"] = 0; GE[2]["7"] = 6; GB[2]["7"] = "7fe01f01e01e01e00f00700000";
+GW[2]["8"] = 13; GT[2]["8"] = 0; GE[2]["8"] = 6; GB[2]["8"] = "3fe3cf1ff8ffc79f3ff07e0000";
+GW[2]["9"] = 13; GT[2]["9"] = 0; GE[2]["9"] = 6; GB[2]["9"] = "3fc3cf1e7cffe1fe1fe0fc0000";
+GW[2]["-"] = 9; GT[2]["-"] = 4; GE[2]["-"] = 4; GB[2]["-"] = "000000000fe0000000";
+NHL[3] = 10;
+GW[3]["a"] = 15; GT[3]["a"] = 2; GE[3]["a"] = 7; GB[3]["a"] = "000000003f81ffc03f8fff1f3e1ffc00000000";
+GW[3]["b"] = 16; GT[3]["b"] = 0; GE[3]["b"] = 7; GB[3]["b"] = "7c007c007df07ffc7c3e7c3e7c7c7ff800000000";
+GW[3]["c"] = 14; GT[3]["c"] = 2; GE[3]["c"] = 7; GB[3]["c"] = "00000000fe0ffe7c01f007c38ffe0000000";
+GW[3]["d"] = 16; GT[3]["d"] = 0; GE[3]["d"] = 7; GB[3]["d"] = "003c007c0ffc3ffc7c7c7c7c7c7c3ffc00000000";
+GW[3]["e"] = 15; GT[3]["e"] = 2; GE[3]["e"] = 7; GB[3]["e"] = "000000003f03ffc7c7cfff1f0e1ffc00000000";
+GW[3]["f"] = 10; GT[3]["f"] = 0; GE[3]["f"] = 7; GB[3]["f"] = "1fcf97f1fe3e0f83e0f800000";
+GW[3]["g"] = 16; GT[3]["g"] = 2; GE[3]["g"] = 9; GB[3]["g"] = "000000000fdc7ffe7cf87ff07fe07ffcf83e7ffc";
+GW[3]["h"] = 16; GT[3]["h"] = 0; GE[3]["h"] = 7; GB[3]["h"] = "7c007c007df07ffc7c7c7c7c7c7c7c7c00000000";
+GW[3]["i"] = 8; GT[3]["i"] = 0; GE[3]["i"] = 7; GB[3]["i"] = "7c7c387c7c7c7c7c0000";
+GW[3]["j"] = 9; GT[3]["j"] = 0; GE[3]["j"] = 9; GB[3]["j"] = "3e1f0707c3e1f0f87c3e7e0";
+GW[3]["k"] = 15; GT[3]["k"] = 0; GE[3]["k"] = 7; GB[3]["k"] = "3c00f801f0e3efc7fc0ffc1f7e1e3e00000000";
+GW[3]["l"] = 8; GT[3]["l"] = 0; GE[3]["l"] = 7; GB[3]["l"] = "7c7c7c7c7c7c7c7c0000";
+GW[3]["m"] = 24; GT[3]["m"] = 2; GE[3]["m"] = 7; GB[3]["m"] = "00000000000039f1f07ffffc7c7c7c7c7c7c7c7c7c7c7c3c000000000000";
+GW[3]["n"] = 16; GT[3]["n"] = 2; GE[3]["n"] = 7; GB[3]["n"] = "0000000039f07ffc7c7c7c7c7c7c7c7c00000000";
+GW[3]["o"] = 16; GT[3]["o"] = 2; GE[3]["o"] = 7; GB[3]["o"] = "000000000fe03ffc783ef83e7c7c3ff800000000";
+GW[3]["p"] = 16; GT[3]["p"] = 2; GE[3]["p"] = 9; GB[3]["p"] = "0000000039f07ffc7c3e7c3e7c7c7ff87c007c00";
+GW[3]["q"] = 16; GT[3]["q"] = 2; GE[3]["q"] = 9; GB[3]["q"] = "000000000fbc3ffc7c7c7c7c7c7c3ffc007c007c";
+GW[3]["r"] = 11; GT[3]["r"] = 2; GE[3]["r"] = 7; GB[3]["r"] = "000000e73fe7e0f81f03e0000000";
+GW[3]["s"] = 12; GT[3]["s"] = 2; GE[3]["s"] = 7; GB[3]["s"] = "0000001f87fe7fc3fe71e7fe000000";
+GW[3]["t"] = 12; GT[3]["t"] = 1; GE[3]["t"] = 7; GB[3]["t"] = "0003c07f8ffc3e03e03ec1fc000000";
+GW[3]["u"] = 16; GT[3]["u"] = 2; GE[3]["u"] = 7; GB[3]["u"] = "0000000038387c7c7c7c7c7c7c7c3ffc00000000";
+GW[3]["v"] = 14; GT[3]["v"] = 2; GE[3]["v"] = 7; GB[3]["v"] = "00000007031e1e7cf0ffc1fe03f00000000";
+GW[3]["w"] = 21; GT[3]["w"] = 2; GE[3]["w"] = 7; GB[3]["w"] = "00000000001c1818f1e3e7df9e1fffe07eff03e3f000000000000";
+GW[3]["x"] = 14; GT[3]["x"] = 2; GE[3]["x"] = 7; GB[3]["x"] = "00000007071f7c1fe03f03ff1e1e0000000";
+GW[3]["y"] = 14; GT[3]["y"] = 2; GE[3]["y"] = 9; GB[3]["y"] = "00000007031f1e3ef07fc0fe01f04781fc0";
+GW[3]["z"] = 14; GT[3]["z"] = 2; GE[3]["z"] = 7; GB[3]["z"] = "00000003fe1ffc07e07e07e01ffc0000000";
+GW[3]["0"] = 16; GT[3]["0"] = 0; GE[3]["0"] = 7; GB[3]["0"] = "1ff07c7c7c7c7c7c7c7c7c7c7c7c1ff000000000";
+GW[3]["1"] = 16; GT[3]["1"] = 0; GE[3]["1"] = 7; GB[3]["1"] = "1fc03fc007c007c007c007c007e03ff800000000";
+GW[3]["2"] = 16; GT[3]["2"] = 0; GE[3]["2"] = 7; GB[3]["2"] = "3ff07cfc307c00f803f00f803ffc7ffc00000000";
+GW[3]["3"] = 16; GT[3]["3"] = 0; GE[3]["3"] = 7; GB[3]["3"] = "3ff038f800f807f000fc007c78fc3ff800000000";
+GW[3]["4"] = 16; GT[3]["4"] = 0; GE[3]["4"] = 7; GB[3]["4"] = "03f007f00ff03ef07cf0fffe01f800f000000000";
+GW[3]["5"] = 16; GT[3]["5"] = 0; GE[3]["5"] = 7; GB[3]["5"] = "3ff83ff03e003ff83c7c007c78fc3ff000000000";
+GW[3]["6"] = 16; GT[3]["6"] = 0; GE[3]["6"] = 7; GB[3]["6"] = "0ff03e107fe07ff87c7c7c7c3e7c1ff800000000";
+GW[3]["7"] = 16; GT[3]["7"] = 0; GE[3]["7"] = 7; GB[3]["7"] = "7ffc7ffc01f003e007c00f800f800f0000000000";
+GW[3]["8"] = 16; GT[3]["8"] = 0; GE[3]["8"] = 7; GB[3]["8"] = "3ff87c7c7c7c3ff87efc7c7c7c7c3ff800000000";
+GW[3]["9"] = 16; GT[3]["9"] = 0; GE[3]["9"] = 7; GB[3]["9"] = "1ff07c787c7c7c7c3ffc0ffc18f83ff000000000";
+GW[3]["-"] = 11; GT[3]["-"] = 5; GE[3]["-"] = 5; GB[3]["-"] = "00000000000001ff000000000000";
+NHL[4] = 12;
+GW[4]["a"] = 17; GT[4]["a"] = 3; GE[4]["a"] = 9; GB[4]["a"] = "00000000000003ff83e3f00ff8fffcf87e7fff07cf000000000";
+GW[4]["b"] = 18; GT[4]["b"] = 0; GE[4]["b"] = 9; GB[4]["b"] = "3e000f8003e000fff83fff8f83e3e0fcf83e3fff0f7f0000000000";
+GW[4]["c"] = 16; GT[4]["c"] = 3; GE[4]["c"] = 9; GB[4]["c"] = "0000000000000ffe3ffe7e007c007e063ffe07f800000000";
+GW[4]["d"] = 18; GT[4]["d"] = 0; GE[4]["d"] = 9; GB[4]["d"] = "000f8007e001f87ffe3fff9f87e7c1f9f87e3fff83fbc000000000";
+GW[4]["e"] = 16; GT[4]["e"] = 3; GE[4]["e"] = 9; GB[4]["e"] = "0000000000001ffc3f3f7e1f7fff7c023fff07f800000000";
+GW[4]["f"] = 11; GT[4]["f"] = 0; GE[4]["f"] = 9; GB[4]["f"] = "0fe3e4fc3ff7fc7e0fc1f83f03c000000";
+GW[4]["g"] = 17; GT[4]["g"] = 3; GE[4]["g"] = 11; GB[4]["g"] = "00000000000003fff7ffebe1f0fff07fe03fff3fffdf03e7ffe";
+GW[4]["h"] = 18; GT[4]["h"] = 0; GE[4]["h"] = 9; GB[4]["h"] = "3e000f8003e000fbfc3fff8f87e3e1f8f87e3e1f8f03c000000000";
+GW[4]["i"] = 8; GT[4]["i"] = 0; GE[4]["i"] = 9; GB[4]["i"] = "3e7e003e3e3e3e3e3e3c0000";
+GW[4]["j"] = 9; GT[4]["j"] = 0; GE[4]["j"] = 11; GB[4]["j"] = "1e1f8003e1f0f87c3e1f0f8fdfc";
+GW[4]["k"] = 17; GT[4]["k"] = 0; GE[4]["k"] = 9; GB[4]["k"] = "3e001f000f8007c7e3ffe1ff80ffc07df83e3f0e07800000000";
+GW[4]["l"] = 8; GT[4]["l"] = 0; GE[4]["l"] = 9; GB[4]["l"] = "3e3e3e3e3e3e3e3e3e3c0000";
+GW[4]["m"] = 27; GT[4]["m"] = 3; GE[4]["m"] = 9; GB[4]["m"] = "000000000000000000001fffbfc3fffffc7c3f0f8f87e1f1f0fc3e3e1f87c781e0780000000000000";
+GW[4]["n"] = 18; GT[4]["n"] = 3; GE[4]["n"] = 9; GB[4]["n"] = "00000000000000fbfc3fff8f87e3e1f8f87e3e1f8f03c000000000";
+GW[4]["o"] = 17; GT[4]["o"] = 3; GE[4]["o"] = 9; GB[4]["o"] = "00000000000003ffc3f3f3e07df03efc3f3fff03fc000000000";
+GW[4]["p"] = 18; GT[4]["p"] = 3; GE[4]["p"] = 11; GB[4]["p"] = "00000000000000fff83fff8f83e3e0fcf83e3fff0fff03e000f800";
+GW[4]["q"] = 18; GT[4]["q"] = 3; GE[4]["q"] = 11; GB[4]["q"] = "000000000000007ffe3fff9f87e7c1f9f87e3fff81ffe001f8007e";
+GW[4]["r"] = 12; GT[4]["r"] = 3; GE[4]["r"] = 9; GB[4]["r"] = "0000000003ef3ff3f03e03e03e03c0000000";
+GW[4]["s"] = 13; GT[4]["s"] = 3; GE[4]["s"] = 9; GB[4]["s"] = "00000000007ff7cfbff0ffec1f7ff8ff0000000";
+GW[4]["t"] = 13; GT[4]["t"] = 1; GE[4]["t"] = 9; GB[4]["t"] = "0000f007c0ffe7fe1f80fc07e01ff87f0000000";
+GW[4]["u"] = 18; GT[4]["u"] = 3; GE[4]["u"] = 9; GB[4]["u"] = "00000000000000f83e3e1f8f87e3e1f8f87e3fff83f3c000000000";
+GW[4]["v"] = 16; GT[4]["v"] = 3; GE[4]["v"] = 9; GB[4]["v"] = "000000000000781f7c3e3e3e1f7c1ff80ff003e000000000";
+GW[4]["w"] = 24; GT[4]["w"] = 3; GE[4]["w"] = 9; GB[4]["w"] = "000000000000000000783c1e7c7e3e3eff3e3fff7c1feff80fc7f00783e0000000000000";
+GW[4]["x"] = 16; GT[4]["x"] = 3; GE[4]["x"] = 9; GB[4]["x"] = "0000000000007c3e3ffc0ff007e01ff87e3e781e00000000";
+GW[4]["y"] = 16; GT[4]["y"] = 3; GE[4]["y"] = 11; GB[4]["y"] = "0000000000007c1f7e3e3f7e0ffc07f803f003e067c07f80";
+GW[4]["z"] = 15; GT[4]["z"] = 3; GE[4]["z"] = 9; GB[4]["z"] = "000000000003ffe3ffc07f03f81fc07ffefff80000000";
+GW[4]["0"] = 17; GT[4]["0"] = 0; GE[4]["0"] = 9; GB[4]["0"] = "0ffc1f9f9f87efc3f7e1fbf0fdf87e7c3e1fff03fc000000000";
+GW[4]["1"] = 17; GT[4]["1"] = 0; GE[4]["1"] = 9; GB[4]["1"] = "03f01ff8007c003e001f000f8007c003e01fff0fff000000000";
+GW[4]["2"] = 17; GT[4]["2"] = 0; GE[4]["2"] = 9; GB[4]["2"] = "1ffc1fff8e07e003f003f007e01f803f007fff9fff800000000";
+GW[4]["3"] = 17; GT[4]["3"] = 0; GE[4]["3"] = 9; GB[4]["3"] = "1ffc1fff840fc00fc03fc001f8007e603f7fff07fe000000000";
+GW[4]["4"] = 17; GT[4]["4"] = 0; GE[4]["4"] = 9; GB[4]["4"] = "00fc00ff01ff81f7c1e3e3e3f1fffeffff007e001e000000000";
+GW[4]["5"] = 17; GT[4]["5"] = 0; GE[4]["5"] = 9; GB[4]["5"] = "1ffe1fff0fc007ff03fff0e0f8007e707e7ffe07fc000000000";
+GW[4]["6"] = 17; GT[4]["6"] = 0; GE[4]["6"] = 9; GB[4]["6"] = "07fe0ffe0f800fffc7f3f3f0fdf87e7c3f1fff03fe000000000";
+GW[4]["7"] = 17; GT[4]["7"] = 0; GE[4]["7"] = 9; GB[4]["7"] = "7fffbfffc01f801f001f001f001f801f800fc003e0000000000";
+GW[4]["8"] = 17; GT[4]["8"] = 0; GE[4]["8"] = 9; GB[4]["8"] = "1ffe1fff8f87c7c3e1ffe1f0f9f87efc3f3fff07fe000000000";
+GW[4]["9"] = 17; GT[4]["9"] = 0; GE[4]["9"] = 9; GB[4]["9"] = "0ffc1fff9f87cfc3f7e1f9fffc3ffe007e1ffe07f8000000000";
+GW[4]["-"] = 12; GT[4]["-"] = 6; GE[4]["-"] = 6; GB[4]["-"] = "000000000000000000ffc000000000000000";
+NHL[5] = 14;
+GW[5]["a"] = 19; GT[5]["a"] = 3; GE[5]["a"] = 10; GB[5]["a"] = "0000000000000000fe01fff8381f807ff1fffe7e0fcfe3f87fff000000000000000";
+GW[5]["b"] = 21; GT[5]["b"] = 0; GE[5]["b"] = 10; GB[5]["b"] = "3f0001f8000fc0007e3c03fffc1fc3f8fc0fc7e07e3f03f1fc7f0ffff00000000000000000";
+GW[5]["c"] = 18; GT[5]["c"] = 3; GE[5]["c"] = 10; GB[5]["c"] = "0000000000000007f01fff8fc0e7e001f8007f000ff7f0fff80000000000000";
+GW[5]["d"] = 21; GT[5]["d"] = 0; GE[5]["d"] = 10; GB[5]["d"] = "0003e0003f0001f803cfc1fffe1f83f1f81f8fc0fc7e07e1fc7f07fff80000000000000000";
+GW[5]["e"] = 19; GT[5]["e"] = 3; GE[5]["e"] = 10; GB[5]["e"] = "0000000000000000fc01fff87e0f9ffffbfffe7e0007f0f83fff000000000000000";
+GW[5]["f"] = 12; GT[5]["f"] = 0; GE[5]["f"] = 10; GB[5]["f"] = "07f1ff1f81f87ff1f81f81f81f81f81f8000000000";
+GW[5]["g"] = 20; GT[5]["g"] = 3; GE[5]["g"] = 13; GB[5]["g"] = "00000000000000001f071ffff7f1f87e1f83fff83ffe03fff83ffff7c07f7f07f3fffe";
+GW[5]["h"] = 21; GT[5]["h"] = 0; GE[5]["h"] = 10; GB[5]["h"] = "3f0001f8000fc0007e1c03fffe1fc3f0fc1f87e0fc3f07e1f83f0fc1f80000000000000000";
+GW[5]["i"] = 9; GT[5]["i"] = 0; GE[5]["i"] = 10; GB[5]["i"] = "3e1f8fc003f1f8fc7e3f1f8fc0000000";
+GW[5]["j"] = 11; GT[5]["j"] = 0; GE[5]["j"] = 13; GB[5]["j"] = "1f03f07e0001f83f07e0fc1f83f07e0fcff9fe0";
+GW[5]["k"] = 20; GT[5]["k"] = 0; GE[5]["k"] = 10; GB[5]["k"] = "1e0003f0003f0003f0003f1fc3fff03ffc03ffc03f7f03f1fc3f07e000000000000000";
+GW[5]["l"] = 9; GT[5]["l"] = 0; GE[5]["l"] = 10; GB[5]["l"] = "3f1f8fc7e3f1f8fc7e3f1f8fc0000000";
+GW[5]["m"] = 32; GT[5]["m"] = 3; GE[5]["m"] = 10; GB[5]["m"] = "0000000000000000000000000c0e01e03ffffffc3fc7f8fe3f07f0fe3f07e0fe3f07e0fe3f07e0fe3f07e07e000000000000000000000000";
+GW[5]["n"] = 21; GT[5]["n"] = 3; GE[5]["n"] = 10; GB[5]["n"] = "0000000000000000181c03fffe1fc3f0fc1f87e0fc3f07e1f83f0fc1f80000000000000000";
+GW[5]["o"] = 20; GT[5]["o"] = 3; GE[5]["o"] = 10; GB[5]["o"] = "00000000000000001fc01fffc3f07e7e03f7e03f7e03f3fdfe0fff8000000000000000";
+GW[5]["p"] = 21; GT[5]["p"] = 3; GE[5]["p"] = 13; GB[5]["p"] = "0000000000000000003c03fffc1fc3f8fc0fc7e07e3f03f1fc7f0ffff07e0003f0001f8000";
+GW[5]["q"] = 21; GT[5]["q"] = 3; GE[5]["q"] = 13; GB[5]["q"] = "000000000000000003c781fffe1fc7f1fc1f8fc0fc7f07e1fc7f07fff8000fc0007e0003f0";
+GW[5]["r"] = 14; GT[5]["r"] = 3; GE[5]["r"] = 10; GB[5]["r"] = "000000000003063ffcfff3f80fc03f00fc03f000000000000";
+GW[5]["s"] = 16; GT[5]["s"] = 3; GE[5]["s"] = 10; GB[5]["s"] = "00000000000007f03ffe7c0c7ff01ffe20ff7f7e7ffc000000000000";
+GW[5]["t"] = 15; GT[5]["t"] = 2; GE[5]["t"] = 10; GB[5]["t"] = "000000007e00fc07ffc3f007e00fc01f803ff83ff000000000000";
+GW[5]["u"] = 21; GT[5]["u"] = 4; GE[5]["u"] = 10; GB[5]["u"] = "0000000000000000000003f07e1f83f0fc1f87e0fc3f07e1f87f07fff80000000000000000";
+GW[5]["v"] = 18; GT[5]["v"] = 4; GE[5]["v"] = 10; GB[5]["v"] = "0000000000000000007e07df83f3f1f87efc0ffe01ff007fc00000000000000";
+GW[5]["w"] = 28; GT[5]["w"] = 4; GE[5]["w"] = 10; GB[5]["w"] = "00000000000000000000000000007c1f83e7e3f87e3f3fcfc1f7fef81ffbff80ff1ff007e1fe0000000000000000000000";
+GW[5]["x"] = 18; GT[5]["x"] = 4; GE[5]["x"] = 10; GB[5]["x"] = "0000000000000000007f1fc7ffc07fc00fe00ffe0fc7e7e0fc0000000000000";
+GW[5]["y"] = 18; GT[5]["y"] = 4; GE[5]["y"] = 13; GB[5]["y"] = "0000000000000000007e07cfc3f1f9f83ffc07fe00ff001f8007e07ff01ff00";
+GW[5]["z"] = 18; GT[5]["z"] = 4; GE[5]["z"] = 10; GB[5]["z"] = "0000000000000000007fff801fc01fc01fc01fc01fffc7fff80000000000000";
+GW[5]["0"] = 20; GT[5]["0"] = 0; GE[5]["0"] = 11; GB[5]["0"] = "07ff01fdfc3f07e7f07e7f07f7f07f7f07f7f07e3f07e1f8fc0fff8007000000000000";
+GW[5]["1"] = 20; GT[5]["1"] = 0; GE[5]["1"] = 10; GB[5]["1"] = "00fc01ffc000fc000fc000fc000fc000fc000fc000fc007ff81fffc000000000000000";
+GW[5]["2"] = 20; GT[5]["2"] = 0; GE[5]["2"] = 10; GB[5]["2"] = "0fff03fffc3c0fe1807e000fe001fc007e003f800fc003fffe3fffe000000000000000";
+GW[5]["3"] = 20; GT[5]["3"] = 0; GE[5]["3"] = 11; GB[5]["3"] = "0fff03fffc1c0fc000fc01ff801ff8000fe0007e3007e7fffe1fff800f000000000000";
+GW[5]["4"] = 20; GT[5]["4"] = 0; GE[5]["4"] = 10; GB[5]["4"] = "007f000ff801ff803ff80f9f81f1f83e1f87ffff7ffff001f8001f8000000000000000";
+GW[5]["5"] = 20; GT[5]["5"] = 0; GE[5]["5"] = 11; GB[5]["5"] = "1fffc1fffc1f8001f8001fff81fdfc1e0fe000fe380fe7fffc1fff800e000000000000";
+GW[5]["6"] = 20; GT[5]["6"] = 0; GE[5]["6"] = 11; GB[5]["6"] = "03ff80fff83f8003f7e07fffc7f87e7f07e3f07f3f07e1fffe0fff8007000000000000";
+GW[5]["7"] = 20; GT[5]["7"] = 0; GE[5]["7"] = 10; GB[5]["7"] = "3fffe7fffe000fc003f0007e001fc001f8003f0007f0007f0007e00000000000000000";
+GW[5]["8"] = 20; GT[5]["8"] = 0; GE[5]["8"] = 11; GB[5]["8"] = "0fff81fffc3f07e3f07e1fffc0fff83f07e7f07e7f07e3fffe1fff8007000000000000";
+GW[5]["9"] = 20; GT[5]["9"] = 0; GE[5]["9"] = 11; GB[5]["9"] = "0fff03fffc3f07e7f07e7f07e3f0ff1fffe07f7e000fe1fffc1fff001c000000000000";
+GW[5]["-"] = 14; GT[5]["-"] = 7; GE[5]["-"] = 7; GB[5]["-"] = "0000000000000000000000003ffc000000000000000000000";
+NHL[6] = 17;
+GW[6]["a"] = 24; GT[6]["a"] = 4; GE[6]["a"] = 13; GB[6]["a"] = "00000000000000000000000001ffc01ffff80f03fc0001fc07fffc3fe1fc3f81fc3f83fc1ffffc03f0f8000000000000000000";
+GW[6]["b"] = 25; GT[6]["b"] = 0; GE[6]["b"] = 13; GB[6]["b"] = "1f80001fe0000ff00007f80003fcfe01ffffe0ff87fc7f80fe3fc07f1fe03f8ff01fc7fc3fc3ffffc078ff000000000000000000000";
+GW[6]["c"] = 22; GT[6]["c"] = 4; GE[6]["c"] = 13; GB[6]["c"] = "000000000000000000000000ffc03fffe1fe0f8fe0007f8001fe0003f80007f83e0ffff803ff000000000000000000";
+GW[6]["d"] = 25; GT[6]["d"] = 0; GE[6]["d"] = 13; GB[6]["d"] = "00007e00007f00003f80001fc01fcfe07ffff0ff87f87f01fc7f80fe3fc07f0fe03f87f83fc0ffffe00fe3e00000000000000000000";
+GW[6]["e"] = 23; GT[6]["e"] = 4; GE[6]["e"] = 13; GB[6]["e"] = "0000000000000000000000001ff801fffe0ff07f3f807e7ffffefffff1fe0001fe03e0ffffc01ff8000000000000000000";
+GW[6]["f"] = 15; GT[6]["f"] = 0; GE[6]["f"] = 13; GB[6]["f"] = "01fe0ffc3f807f01ff8fffc7f807f00fe01fc03f807f00fe00f0000000000000";
+GW[6]["g"] = 25; GT[6]["g"] = 4; GE[6]["g"] = 16; GB[6]["g"] = "000000000000000000000000001ff0f0fffffcfe1fe07f07f03f83f80ffff807ffe003fffc01ffffe3fffff9f800fefffffe1ffffc0";
+GW[6]["h"] = 25; GT[6]["h"] = 0; GE[6]["h"] = 13; GB[6]["h"] = "1f80001fe0000ff00007f80003fc7f01fffff0ffc3f87f81fc3fc0fe1fe07f0ff03f87f81fc3fc0fe07801e00000000000000000000";
+GW[6]["i"] = 12; GT[6]["i"] = 0; GE[6]["i"] = 13; GB[6]["i"] = "0603fc3fc0000f03fc3fc3fc3fc3fc3fc3fc3fc0f0000000000";
+GW[6]["j"] = 13; GT[6]["j"] = 0; GE[6]["j"] = 16; GB[6]["j"] = "0300ff07f800003807f03f81fc0fe07f03f81fc0fe07f03f9ff8ff80";
+GW[6]["k"] = 24; GT[6]["k"] = 0; GE[6]["k"] = 13; GB[6]["k"] = "1f80001f80001f80001f80001f80781f87fc1f9ff01fff801fff001fffc01fdfe01f87f81f81fe0f007c000000000000000000";
+GW[6]["l"] = 12; GT[6]["l"] = 0; GE[6]["l"] = 13; GB[6]["l"] = "1f83fc3fc3fc3fc3fc3fc3fc3fc3fc3fc3fc3fc0f0000000000";
+GW[6]["m"] = 39; GT[6]["m"] = 4; GE[6]["m"] = 13; GB[6]["m"] = "0000000000000000000000000000000000000001f07f01fc07fffffffe0ffc3ff1fe1fe07f81fc3fc0ff03f87f81fe07f0ff03fc0fe1fe07f81fc3fc0fe03f81e007803e000000000000000000000000000000";
+GW[6]["n"] = 25; GT[6]["n"] = 4; GE[6]["n"] = 13; GB[6]["n"] = "00000000000000000000000001f07f01fffff0ffc3f87f81fc3fc0fe1fe07f0ff03f87f81fc3fc0fe07801e00000000000000000000";
+GW[6]["o"] = 25; GT[6]["o"] = 4; GE[6]["o"] = 13; GB[6]["o"] = "000000000000000000000000001ffc007fffc0ff07f8ff00fe7f007f3f803f9fe01fc7fc3fc0ffffc007fe000000000000000000000";
+GW[6]["p"] = 25; GT[6]["p"] = 4; GE[6]["p"] = 16; GB[6]["p"] = "00000000000000000000000000f0fe01ffffe0ff87fc7f80fe3fc07f1fe03f8ff01fc7fc3fc3ffffc1feff00ff00007f80001fc0000";
+GW[6]["q"] = 25; GT[6]["q"] = 4; GE[6]["q"] = 16; GB[6]["q"] = "000000000000000000000000001fc7e07ffff0ff8ff87f01fc7f80fe3fc07f0fe03f87fc3fc0ffffe00fe7f00003f80001fc0000fe0";
+GW[6]["r"] = 17; GT[6]["r"] = 4; GE[6]["r"] = 13; GB[6]["r"] = "000000000000000000f079fffcfffe7fc03fc01fe00ff007f803fc0078000000000000000";
+GW[6]["s"] = 19; GT[6]["s"] = 4; GE[6]["s"] = 13; GB[6]["s"] = "000000000000000000007fe07fff9f81e3ff803fff81fff8c03fbf07f7fffc0ffc000000000000000";
+GW[6]["t"] = 18; GT[6]["t"] = 2; GE[6]["t"] = 13; GB[6]["t"] = "0000000000fc003f803ffe1fffe1fe003f800fe003f800fe003f8e0fffc0ff000000000000000";
+GW[6]["u"] = 25; GT[6]["u"] = 4; GE[6]["u"] = 13; GB[6]["u"] = "00000000000000000000000000f003c1fe07f0ff03f87f81fc3fc0fe1fe07f0ff03f87f83fc1ffffe01fe1e00000000000000000000";
+GW[6]["v"] = 23; GT[6]["v"] = 4; GE[6]["v"] = 13; GB[6]["v"] = "00000000000000000000000380038fe01f8fe07e0fc1fc1fc7f01fdfc01fff001ffc003ff8001fc0000000000000000000";
+GW[6]["w"] = 33; GT[6]["w"] = 4; GE[6]["w"] = 13; GB[6]["w"] = "0000000000000000000000000000000003800c0073f81f80fcfc1fe0fe7f1ff0fe1fcffc7e07efbf7e03ff9fff00ff87ff003fc1ff000f807f000000000000000000000000000";
+GW[6]["x"] = 23; GT[6]["x"] = 4; GE[6]["x"] = 13; GB[6]["x"] = "000000000000000000000003c00f0ff07f07fbf803ffe001ff0003fe001fff00fe3f87f03fc7800f000000000000000000";
+GW[6]["y"] = 23; GT[6]["y"] = 4; GE[6]["y"] = 16; GB[6]["y"] = "000000000000000000000003c0038fe01f8fe07e0fe1fc0fe7f00fffc007ff0007fc0007f0000fe0003f803ffc003fe000";
+GW[6]["z"] = 21; GT[6]["z"] = 4; GE[6]["z"] = 13; GB[6]["z"] = "0000000000000000000000fffe1ffffc3c7fc007f800ff001fe003fc007fc007ffff9ffff00000000000000000";
+GW[6]["0"] = 25; GT[6]["0"] = 0; GE[6]["0"] = 13; GB[6]["0"] = "03ffe007fffc07f07f07f01fc3f80ff1fc07f8fe03fc7f01fe3f80ff1fc07f0fe03f83f83f807fff800ffe000000000000000000000";
+GW[6]["1"] = 25; GT[6]["1"] = 0; GE[6]["1"] = 13; GB[6]["1"] = "001f800fffc003ffe0000ff00007f80003fc0001fe0000ff00007f80003fc0001fe0000ff000ffffc03fffc00000000000000000000";
+GW[6]["2"] = 25; GT[6]["2"] = 0; GE[6]["2"] = 13; GB[6]["2"] = "03ffe00ffffc0fe0ff03c03fc0400fe0000ff0000ff0001fe0003f8000fe0001fc0003ffffc3ffffe07fffe00000000000000000000";
+GW[6]["3"] = 25; GT[6]["3"] = 0; GE[6]["3"] = 13; GB[6]["3"] = "03ffe00ffffc07c0ff00803f80003fc007ff8003ffc00007f80000fe00007f8e003f87f87fc3ffff801ffe000000000000000000000";
+GW[6]["4"] = 25; GT[6]["4"] = 0; GE[6]["4"] = 13; GB[6]["4"] = "000ff0000ff8001ffc001ffe001fbf003f1f803f0fc03f07e07ffffe3fffff8fffffc000fe00007f00000f000000000000000000000";
+GW[6]["5"] = 25; GT[6]["5"] = 0; GE[6]["5"] = 13; GB[6]["5"] = "0ffff80ffffc07fffc03fc0001fe0000ffff807ffff01f03fc0001fe0000ff07007f87f0ff81ffff801ffe000000000000000000000";
+GW[6]["6"] = 25; GT[6]["6"] = 0; GE[6]["6"] = 13; GB[6]["6"] = "00fff003fff803fc0003f80003fdfe01ffffe0ff87f87f81fc3f80ff1fc07f87f03f83fe7fc07fff8007fe000000000000000000000";
+GW[6]["7"] = 25; GT[6]["7"] = 0; GE[6]["7"] = 13; GB[6]["7"] = "3ffffe1fffff87ffff80007f0000fe0000fe0001fe0001fe0000fe0000ff0000ff00007f80003fc0000fc0000000000000000000000";
+GW[6]["8"] = 25; GT[6]["8"] = 0; GE[6]["8"] = 13; GB[6]["8"] = "03fff007fffe07f07f87f01fc1fc0fe07fffe01fffc03fc3f83f80fe1fc07f8fe03f87fc7fc0ffffc00fff000000000000000000000";
+GW[6]["9"] = 25; GT[6]["9"] = 0; GE[6]["9"] = 13; GB[6]["9"] = "03ffe007fffc0ff07f07f01fc3f80fe1fc07f8fe07fc3fc7fe0ffffe007c7f00007f01f1ff01ffff003ff8000000000000000000000";
+GW[6]["-"] = 17; GT[6]["-"] = 8; GE[6]["-"] = 9; GB[6]["-"] = "00000000000000000000000000000000007ffc3ffe0000000000000000000000000000000";
+NHL[7] = 20;
+GW[7]["a"] = 28; GT[7]["a"] = 5; GE[7]["a"] = 15; GB[7]["a"] = "0000000000000000000000000000000000001fffc00fffff80f807fc04003fc003fffc0fffffc3fe03fc3fc07fc3fe0ffc1fffffc07ff3f80000000000000000000000000000";
+GW[7]["b"] = 30; GT[7]["b"] = 0; GE[7]["b"] = 15; GB[7]["b"] = "0fe000007f800001fe000007f800001fe000007f9ff801fffffc07fe0ff81fe00ff07f803fe1fe00ff87f803fe1fe00ff07fc0ff81fffffc03fbff80000000000000000000000000000000";
+GW[7]["c"] = 26; GT[7]["c"] = 5; GE[7]["c"] = 15; GB[7]["c"] = "00000000000000000000000000000000003fff007ffff87fe07c3fe0000ff00003fc0000ff00003fe00107fc07e07ffff803fff000000000000000000000000000";
+GW[7]["d"] = 30; GT[7]["d"] = 0; GE[7]["d"] = 15; GB[7]["d"] = "00000fe000007f800001fe000007f800001fe003ff7f807ffffe07fe0ff83fe01fe0ff007f83fc01fe0ff007f83fc01fe07fc0ff80fffffe007ff3f8000000000000000000000000000000";
+GW[7]["e"] = 27; GT[7]["e"] = 5; GE[7]["e"] = 15; GB[7]["e"] = "000000000000000000000000000000000001fff003ffffc0ff83fc3fc01fcffffff9ffffff3fe00003fc00083fe01f81fffff007fff0000000000000000000000000000";
+GW[7]["f"] = 18; GT[7]["f"] = 0; GE[7]["f"] = 15; GB[7]["f"] = "00ffc0fff07f803fc00ff00fffe7fffc3fe00ff803fe00ff803fe00ff803fe00ff801fc0000000000000000000";
+GW[7]["g"] = 29; GT[7]["g"] = 5; GE[7]["g"] = 19; GB[7]["g"] = "00000000000000000000000000000000000000fff9fc3fffffe3fc1fe03fc0ff01fe07f807f87fc01ffffc00fffe000fffff003fffff87fffffe7f0007fbf8003fcffffffc1fffff0";
+GW[7]["h"] = 30; GT[7]["h"] = 0; GE[7]["h"] = 15; GB[7]["h"] = "0fc000007f800001fe000007f800001fe000007f8ffc01fffffc07ff0ff81ff01fe07f807f81fe01fe07f807f81fe01fe07f807f81fe01fe03f803f8000000000000000000000000000000";
+GW[7]["i"] = 14; GT[7]["i"] = 1; GE[7]["i"] = 15; GB[7]["i"] = "00007f81ff07f800003f01fe07f81fe07f81fe07f81fe07f81fe03f000000000000000";
+GW[7]["j"] = 15; GT[7]["j"] = 1; GE[7]["j"] = 19; GB[7]["j"] = "00001ff03fe03f800000fe01fe03fc07f80ff01fe03fc07f80ff01fe03fc07f81ff3ffc7fe0";
+GW[7]["k"] = 28; GT[7]["k"] = 0; GE[7]["k"] = 15; GB[7]["k"] = "0fc00001fe00001fe00001fe00001fe00001fe03fc1fe1ffc1fe7fe01ffff801fffc001fffe001ffff801fe3fe01fe0ff81fe03fe0fc01fe0000000000000000000000000000";
+GW[7]["l"] = 14; GT[7]["l"] = 0; GE[7]["l"] = 15; GB[7]["l"] = "0fc07f81fe07f81fe07f81fe07f81fe07f81fe07f81fe07f81fe03f000000000000000";
+GW[7]["m"] = 46; GT[7]["m"] = 5; GE[7]["m"] = 15; GB[7]["m"] = "00000000000000000000000000000000000000000000000000000000003f0ffc0ffc01fffffffffe07ff0fff07f81ff01ff01ff07f807f807fc1fe01fe01ff07f807f807fc1fe01fe01ff07f807f807fc1fe01fe01ff03f803f803f80000000000000000000000000000000000000000000000";
+GW[7]["n"] = 30; GT[7]["n"] = 5; GE[7]["n"] = 15; GB[7]["n"] = "000000000000000000000000000000000000003f0ffc01fffffc07ff0ff81ff01fe07f807f81fe01fe07f807f81fe01fe07f807f81fe01fe03f803f8000000000000000000000000000000";
+GW[7]["o"] = 29; GT[7]["o"] = 5; GE[7]["o"] = 15; GB[7]["o"] = "000000000000000000000000000000000000007ffe001ffffe03fe07fc3fc00ff3fe007f9ff003fcff801fe3fc01ff0ff81ff03fffff003fff8000000000000000000000000000000";
+GW[7]["p"] = 30; GT[7]["p"] = 5; GE[7]["p"] = 19; GB[7]["p"] = "000000000000000000000000000000000000003f1ff801fffffc07ff1ff81fe01ff07f803fe1fe00ff87f803fe1fe00ff07fc0ff81fffffc07ffff801fe000007f800001fe000007f80000";
+GW[7]["q"] = 30; GT[7]["q"] = 5; GE[7]["q"] = 19; GB[7]["q"] = "0000000000000000000000000000000000000003fe3f807ffffe07ff1ff83fe01fe0ff007f83fc01fe0ff007f83fe01fe07fc0ff80fffffe007ff7f800001fe000007f800001fe000007f8";
+GW[7]["r"] = 20; GT[7]["r"] = 5; GE[7]["r"] = 15; GB[7]["r"] = "00000000000000000000000000fc3f1feff1fffe1ffc01ff001fe001fe001fe001fe001fe000fc0000000000000000000000";
+GW[7]["s"] = 22; GT[7]["s"] = 5; GE[7]["s"] = 15; GB[7]["s"] = "00000000000000000000000000001fff81ffff8fc03e3fc000ffff00ffff007fff3801fcfc07f7ffff83fff00000000000000000000000";
+GW[7]["t"] = 21; GT[7]["t"] = 2; GE[7]["t"] = 15; GB[7]["t"] = "000000000000f8000fe0007f001ffff1ffffc1ff000ff0007f8003fc001fe000ff8007fc781fffc07ff8000000000000000000000";
+GW[7]["u"] = 30; GT[7]["u"] = 5; GE[7]["u"] = 15; GB[7]["u"] = "000000000000000000000000000000000000003f003f01fe01fe07f807f81fe01fe07f807f81fe01fe07f807f81fe01fe07f80ff80fffffe00ffe3f8000000000000000000000000000000";
+GW[7]["v"] = 26; GT[7]["v"] = 5; GE[7]["v"] = 15; GB[7]["v"] = "000000000000000000000000000000000f8003e7f803fcff01fe1fe07f03f83f80ff1fe01feff003fff8007ffc001fff0001ff0000000000000000000000000000";
+GW[7]["w"] = 39; GT[7]["w"] = 5; GE[7]["w"] = 15; GB[7]["w"] = "00000000000000000000000000000000000000000000000007c00f800f9fe03fc07f9fc0ff80fe3fc1ff83f83fc7ff8ff03fdfff1fc03ffe7f7f007ff8fffe007ff0fff8007fc0ffe0007f00ff80000000000000000000000000000000000000000";
+GW[7]["x"] = 26; GT[7]["x"] = 5; GE[7]["x"] = 15; GB[7]["x"] = "000000000000000000000000000000000fc00fe3fe0ff83feff803fff8003ff80007fc0007ff8007fff807fc7fc7fc07f9fc007f00000000000000000000000000";
+GW[7]["y"] = 26; GT[7]["y"] = 5; GE[7]["y"] = 19; GB[7]["y"] = "000000000000000000000000000000000fc003e7fc03fcff81fe0ff0ff01fe3f803fdfc007fff000fff8001ffc0003fe00007f00001f800c1fe003ffe000ffe000";
+GW[7]["z"] = 25; GT[7]["z"] = 5; GE[7]["z"] = 15; GB[7]["z"] = "00000000000000000000000000000000fffff0fffffc1ffffc000ff8001ff0003fe0007fe000ffc001ff8001fffffc7ffffe0000000000000000000000000";
+GW[7]["0"] = 29; GT[7]["0"] = 0; GE[7]["0"] = 15; GB[7]["0"] = "00fffc003ffff803fc0ff03fc03fc3fe01fe1ff00ff8ff007fc7f803fe3fc01ff1fe00ff8ff807fc7fc03fc1fe01fe07f81fe01ffffe001fff8000000000000000000000000000000";
+GW[7]["1"] = 29; GT[7]["1"] = 0; GE[7]["1"] = 15; GB[7]["1"] = "0007f0003fff8003fffc00003fe00001ff00000ff800007fc00003fe00001ff00000ff800007fc00003fe00001ff00000ff8001fffff00fffff000000000000000000000000000000";
+GW[7]["2"] = 29; GT[7]["2"] = 0; GE[7]["2"] = 15; GB[7]["2"] = "01fff8007ffff807fffff07f00ffc0f003fe00001ff00000ff00001ff00001fe00007fc0000ff00001fe00007f80000ffffff07fffff83fffff800000000000000000000000000000";
+GW[7]["3"] = 29; GT[7]["3"] = 0; GE[7]["3"] = 15; GB[7]["3"] = "01fffc007ffffc07f83ff00e00ff800007fc00007fc000fff8000fffc0001fffc00001ff00000ffc00007fe1c003fe1ff07ff07ffffe007fffc000000000000000000000000000000";
+GW[7]["4"] = 29; GT[7]["4"] = 0; GE[7]["4"] = 15; GB[7]["4"] = "0003fe00003ff80007ffc0007ffe0007fff000fe7f800fe3fc00fe1fe01fc0ff01fc07f81ffffffcffffffe1fffffc00007f800003fc00000fc000000000000000000000000000000";
+GW[7]["5"] = 29; GT[7]["5"] = 0; GE[7]["5"] = 15; GB[7]["5"] = "07ffff007ffffc03ffffe01fe00000ff000007ffe0003ffffc01fffff00fe03fc00001ff00000ff800007fc1e003fe1ff0ffe07ffffc007fff8000000000000000000000000000000";
+GW[7]["6"] = 29; GT[7]["6"] = 0; GE[7]["6"] = 15; GB[7]["6"] = "003fff000ffff801ff81801fe00001fe00000ff7ff00fffffe07ff07fc3fe01fe1ff00ff8ff807fc3fc03fe1ff01fe07fe3fe00ffffe001fffc000000000000000000000000000000";
+GW[7]["7"] = 29; GT[7]["7"] = 0; GE[7]["7"] = 15; GB[7]["7"] = "1fffffe1ffffff8ffffff80000ff00000ff00001fe00001fe00003fe00003fe00003fe00001fe00001ff00000ff00000ff800007fc00001fe00000000000000000000000000000000";
+GW[7]["8"] = 29; GT[7]["8"] = 0; GE[7]["8"] = 15; GB[7]["8"] = "01fffe003ffffc03fc0ff03fc03fc1fe01fe0ff01fe01ffffe007fffc00fffffc0ff00ff0ff807fc7fc03fe3fe01fe0ffc3ff03ffffe003fffc000000000000000000000000000000";
+GW[7]["9"] = 29; GT[7]["9"] = 0; GE[7]["9"] = 15; GB[7]["9"] = "01fffc003ffff807fe1ff03fc07f83fe01fe1ff00ff0ff807fc7fc07fe1ff07ff07fffff007ff7f800007fc00007fc03e1ffc03ffff800fffe0000000000000000000000000000000";
+GW[7]["-"] = 19; GT[7]["-"] = 9; GE[7]["-"] = 11; GB[7]["-"] = "00000000000000000000000000000000000000000003ffc3fffe3fff800000000000000000000000000000000000000";
+NHL[8] = 24;
+GW[8]["a"] = 33; GT[8]["a"] = 6; GE[8]["a"] = 18; GB[8]["a"] = "0000000000000000000000000000000000000000000000000001fffe000ffffff007fc1ffc03c003ff000001ff8003ffffc03fffffe0ffe03ff0ffc01ff87fe00ffc1ffc3ffe07ffffff00fff8ff000000000000000000000000000000000000000000";
+GW[8]["b"] = 36; GT[8]["b"] = 0; GE[8]["b"] = 18; GB[8]["b"] = "07f0000000ff8000000ff8000000ff8000000ff8000000ff8000000ff87fe000ffffffc00fffffff00ffc01ff80ff800ffc0ff800ffc0ff800ffc0ff800ffc0ff800ffc0ff801ff80ffe07ff00ffffffe00ffbfff00000000000000000000000000000000000000000000000";
+GW[8]["c"] = 31; GT[8]["c"] = 6; GE[8]["c"] = 18; GB[8]["c"] = "0000000000000000000000000000000000000000000000000ffff001fffffc07fffff83ff000f07fc00001ff800003ff000007fe00000ffc00000ffc001e0fff0ffc07fffff801ffff8000000000000000000000000000000000000000";
+GW[8]["d"] = 36; GT[8]["d"] = 0; GE[8]["d"] = 18; GB[8]["d"] = "000000fe0000001ff8000001ff8000001ff8000001ff8000001ff8003ff1ff803ffffff80fffffff81ff801ff83ff001ff83ff001ff83ff001ff83ff001ff83ff001ff81ff801ff80ffe0fff807ffffff800fffdff0000000000000000000000000000000000000000000000";
+GW[8]["e"] = 32; GT[8]["e"] = 6; GE[8]["e"] = 18; GB[8]["e"] = "000000000000000000000000000000000000000000000000003fff0003fffff00ffffffc1ff803fe3ff001fe3ffffffe3ffffffe3fe000003fe000001ff0001c0ffe03fe03fffffe007ffff00000000000000000000000000000000000000000";
+GW[8]["f"] = 21; GT[8]["f"] = 0; GE[8]["f"] = 18; GB[8]["f"] = "001ff807ffc0fffe0ffc007fe003ff003fff87ffff3ffff03ff001ff800ffc007fe003ff001ff800ffc007fe003ff000ff0000000000000000000000000000";
+GW[8]["g"] = 35; GT[8]["g"] = 6; GE[8]["g"] = 23; GB[8]["g"] = "0000000000000000000000000000000000000000000000000000001fff03f03fffffff0ffffffbe3fe01ff00ffc03fe00ff807fc01ff81ff801fffffc001ffffe0007c0000000ffffff000ffffffe07ffffffe1ff001ffe7f80003fc7fe001ff87ffffffe01fffffe0";
+GW[8]["h"] = 36; GT[8]["h"] = 0; GE[8]["h"] = 18; GB[8]["h"] = "07f0000000ff8000001ff8000001ff8000001ff8000001ff8000001ff83ff001ffbfffe01fffffff01ffe01ff81ffc01ff81ff801ff81ff801ff81ff801ff81ff801ff81ff801ff81ff801ff80ff801ff80ff801ff0000000000000000000000000000000000000000000000";
+GW[8]["i"] = 16; GT[8]["i"] = 1; GE[8]["i"] = 18; GB[8]["i"] = "00000ff81ffc1ffc0000000003e00ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff800000000000000000000";
+GW[8]["j"] = 18; GT[8]["j"] = 1; GE[8]["j"] = 23; GB[8]["j"] = "000001ff807fe01ff800000000001f800ff807fe01ff807fe01ff807fe01ff807fe01ff807fe01ff807fe01ff807fe3fff0fffc3ffc0";
+GW[8]["k"] = 34; GT[8]["k"] = 0; GE[8]["k"] = 18; GB[8]["k"] = "07f0000003fe000000ff8000003fe000000ff8000003fe000000ff801fc03fe03ff80ff87ff803fefff800fffff0003ffff0000ffffe0003ffffe000ffcffc003fe0ffc00ff81ffc03fe01ffc07f001ff0000000000000000000000000000000000000000000";
+GW[8]["l"] = 16; GT[8]["l"] = 0; GE[8]["l"] = 18; GB[8]["l"] = "07f00ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff80ff800000000000000000000";
+GW[8]["m"] = 55; GT[8]["m"] = 6; GE[8]["m"] = 18; GB[8]["m"] = "000000000000000000000000000000000000000000000000000000000000000000000000000000000001fc0ffc01ffc007fdffff1ffff01ffffffffffff03ffc03ffc07fe07ff007fe00ffc0ffc00ffc01ff81ff801ff803ff03ff003ff007fe07fe007fe00ffc0ffc00ffc01ff81ff801ff803ff01ff003ff007fe03fe003fc007f8000000000000000000000000000000000000000000000000000000000000000000000";
+GW[8]["n"] = 36; GT[8]["n"] = 6; GE[8]["n"] = 18; GB[8]["n"] = "00000000000000000000000000000000000000000000000000000007f03ff000ffbfffe01fffffff01ffe01ff81ffc01ff81ff801ff81ff801ff81ff801ff81ff801ff81ff801ff81ff801ff80ff801ff80ff801ff0000000000000000000000000000000000000000000000";
+GW[8]["o"] = 35; GT[8]["o"] = 6; GE[8]["o"] = 18; GB[8]["o"] = "0000000000000000000000000000000000000000000000000000000fffe0001fffffc00ffffffe03ff003ff0ffc003fe1ff8007fe3ff000ffc7fe001ff8ffc003ff0ffc00ffc0fff0fff00ffffff8003ffff8000000000000000000000000000000000000000000000";
+GW[8]["p"] = 36; GT[8]["p"] = 6; GE[8]["p"] = 23; GB[8]["p"] = "00000000000000000000000000000000000000000000000000000003e07fe000ffffffc00fffffff00ffc03ff80ff800ffc0ff800ffc0ff800ffc0ff800ffc0ff800ffc0ff801ff80ffe07ff00ffffffe00ffffff000ff8000000ff8000000ff8000000ff8000000ff800000";
+GW[8]["q"] = 36; GT[8]["q"] = 6; GE[8]["q"] = 23; GB[8]["q"] = "000000000000000000000000000000000000000000000000000000003ff0ff003ffffff80fffffff81ffc03ff81ff801ff83ff001ff83ff001ff83ff001ff83ff001ff81ff801ff80ffe0fff807ffffff800fffdff8000001ff8000001ff8000001ff8000001ff8000001ff0";
+GW[8]["r"] = 24; GT[8]["r"] = 6; GE[8]["r"] = 18; GB[8]["r"] = "00000000000000000000000000000000000007f03e0ff9ff0fffff0ffff00ffe000ffc000ff8000ff8000ff8000ff8000ff8000ff8000ff800000000000000000000000000000000";
+GW[8]["s"] = 27; GT[8]["s"] = 6; GE[8]["s"] = 18; GB[8]["s"] = "0000000000000000000000000000000000000000007fff007ffffc1ff1ff87f800e0fff0000ffffc00fffff003ffff00003ff1f001fe3ff0ffc7fffff01ffff00000000000000000000000000000000000";
+GW[8]["t"] = 26; GT[8]["t"] = 3; GE[8]["t"] = 18; GB[8]["t"] = "000000000000000000000ff00007fe0001ff8001ffff81fffff83ffffe01ff80007fe0001ff80007fe0001ff80007fe0001ff80003ff3f00ffffc00fffc000000000000000000000000000000000";
+GW[8]["u"] = 36; GT[8]["u"] = 6; GE[8]["u"] = 18; GB[8]["u"] = "00000000000000000000000000000000000000000000000000000007e0007e00ff801ff81ff801ff81ff801ff81ff801ff81ff801ff81ff801ff81ff801ff81ff801ff80ff803ff80ffc0fff807ffffff803fff8ff0000000000000000000000000000000000000000000000";
+GW[8]["v"] = 32; GT[8]["v"] = 6; GE[8]["v"] = 18; GB[8]["v"] = "0000000000000000000000000000000000000000000000001f0000787fc003fe3fe007fc1ff007fc0ff80ff80ffc1ff007fc3fe003fe7fc001ff7fc000ffff8000ffff00007ffe00003ffc000000000000000000000000000000000000000000";
+GW[8]["w"] = 47; GT[8]["w"] = 6; GE[8]["w"] = 18; GB[8]["w"] = "000000000000000000000000000000000000000000000000000000000000000000000007c000e0003e3fe007f801ff3fe01ff807fc3fe07ff01ff07fc0fff03fe07fc3fff0ff807fcfdfe3fe00ff9f9fe7fc00fffe3ffff000fff83fffc001fff03fff8001ffc07ffe0001ff007ff8000000000000000000000000000000000000000000000000000000000000";
+GW[8]["x"] = 32; GT[8]["x"] = 6; GE[8]["x"] = 18; GB[8]["x"] = "0000000000000000000000000000000000000000000000001f8003f83ff00ffc1ffc3ff007ffffc001ffff00003ffc00001ff800003ffc0000ffff0003fe7fc00ff81ff03ff00ffc3fc003fe0000000000000000000000000000000000000000";
+GW[8]["y"] = 32; GT[8]["y"] = 6; GE[8]["y"] = 23; GB[8]["y"] = "0000000000000000000000000000000000000000000000001f0000783fe003fe3ff007fc0ff80ff807fc0ff803fe1ff001ff3fe000ffffc0007fff80003fff00001fff00000ffe000007fc000007f800000ff0003fffe0003fff80003ffe0000";
+GW[8]["z"] = 30; GT[8]["z"] = 6; GE[8]["z"] = 18; GB[8]["z"] = "00000000000000000000000000000000000000000000007ffffe07fffffe1ffffff00003ff80003ff80003ff80003ff80003ff80003ff80003ff80003fffffe0ffffffe3ffffff00000000000000000000000000000000000000";
+GW[8]["0"] = 35; GT[8]["0"] = 0; GE[8]["0"] = 19; GB[8]["0"] = "003fffc0003fffff001ff83ff007fc01ff00ff801ff03ff003ff07fc007fe0ff800ffc3ff001ff87fe003ff0ffc007fe1ff800ffc1ff001ff83ff003ff07fe007fc07fc01ff807fe07fe007fffff0001ffff800000fc00000000000000000000000000000000000000";
+GW[8]["1"] = 35; GT[8]["1"] = 0; GE[8]["1"] = 18; GB[8]["1"] = "0000fe00003fffe0001ffffc0003ffff8000007ff000000ffe000001ffc000003ff8000007ff000000ffe000001ffc000003ff8000007ff000000ffe000001ffc000003ff80000fffff8007fffffc00ffffff000000000000000000000000000000000000000000000";
+GW[8]["2"] = 35; GT[8]["2"] = 0; GE[8]["2"] = 18; GB[8]["2"] = "007fff80007ffffe003ffffff00ff807ff01fc007ff00f0007fe000000ffc000001ff8000007fe000003ff000001ff800000ffc00000ffc000007fc000003fe000001ff000000fffffff03ffffffe03ffffffc00000000000000000000000000000000000000000000";
+GW[8]["3"] = 35; GT[8]["3"] = 0; GE[8]["3"] = 19; GB[8]["3"] = "007fffc0007fffff003ffffff007f003ff0038007fe000000ffc000003ff000007ffc0001fffc00003ffff0000003ff8000001ff8000003ff8000007ff030000ffe0fc001ff81ffffffe01ffffff8007ffff800001f800000000000000000000000000000000000000";
+GW[8]["4"] = 35; GT[8]["4"] = 0; GE[8]["4"] = 18; GB[8]["4"] = "00007fe000001ffe00000fffc00003fff80000ffff00007fbfe0001fe7fc0007f8ff8003fe1ff000ff03fe003fc07fc01ff00ff803fffffff87fffffff8fffffffe00000ff8000001ff0000003fe0000003f8000000000000000000000000000000000000000000000";
+GW[8]["5"] = 35; GT[8]["5"] = 0; GE[8]["5"] = 19; GB[8]["5"] = "03fffff800ffffff801ffffff003fffff0007fc000000ff8000001ff8000003fffff0007fffff800ffc1ffc01fc01ffc000001ff8000003ff0000007fe03c000ffc0fe003ff03ffffffc01ffffff0007ffff000003f000000000000000000000000000000000000000";
+GW[8]["6"] = 35; GT[8]["6"] = 0; GE[8]["6"] = 19; GB[8]["6"] = "000ffff0000ffffe0007ffffc003ff800000ffc000001ff0000007fe7ff800ffffffe01fff8ffe03ff807fe07fe007fe0ffc00ffc1ff801ff83ff003ff03fe007fe07fe01ff807fffffe003fffff8001ffff800000fc00000000000000000000000000000000000000";
+GW[8]["7"] = 35; GT[8]["7"] = 0; GE[8]["7"] = 18; GB[8]["7"] = "0fffffff03fffffff07ffffffe07ffffff000000ffc000003fe000001ff8000007fc000003ff000000ffc000003ff000000ffc000001ff8000007fe000001ffc000003ff0000007fe000000ffc000001ff800000000000000000000000000000000000000000000000";
+GW[8]["8"] = 35; GT[8]["8"] = 0; GE[8]["8"] = 19; GB[8]["8"] = "007fffe0007fffff001ffffff807fc01ff80ff801ff01ff003fe03fe00ff803ff87fe001fffff0007fffff003ff81ff80ffc01ff81ff801ff83ff003ff07fe007fe0ffc01ff80ffffffe00ffffff8003ffffc00001fc00000000000000000000000000000000000000";
+GW[8]["9"] = 35; GT[8]["9"] = 0; GE[8]["9"] = 19; GB[8]["9"] = "007fff80007ffffe001ffffff007fe03ff01ff803ff03ff003fe07fe007fe0ffc00ffc1ff803ff83ff007ff03ff03ffe01ffffffc00fff9ff0000007fe000000ff8004007fe003fffff800fffffc000ffffe000007e000000000000000000000000000000000000000";
+GW[8]["-"] = 23; GT[8]["-"] = 11; GE[8]["-"] = 13; GB[8]["-"] = "0000000000000000000000000000000000000000000000000000000000000001fffe07ffff0ffffe0000000000000000000000000000000000000000000000000000000000";
+NHL[9] = 28;
+GW[9]["a"] = 39; GT[9]["a"] = 7; GE[9]["a"] = 21; GB[9]["a"] = "00000000000000000000000000000000000000000000000000000000000000000000000ffffc0003ffffff8007ffffff800fe003ff800c0003ff80000007ff0000fffffe007ffffffc03ffc03ff81ffc007ff03ff800ffe07ff003ffc07ffcffff807fffffff003fff87fc00000000000000000000000000000000000000000000000000000000000";
+GW[9]["b"] = 42; GT[9]["b"] = 0; GE[9]["b"] = 21; GB[9]["b"] = "03f800000003ff80000000ffe00000003ff80000000ffe00000003ff80000000ffe00000003ff83ff0000fffffffe003fffffffe00fff803ffc03ffc007ff80fff000ffe03ffc003ffc0fff000fff03ffc003ffc0fff000ffe03ffc003ff80fff001ffc03fff87ffe00fffffffe001ffbfffc00000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["c"] = 36; GT[9]["c"] = 7; GE[9]["c"] = 21; GB[9]["c"] = "0000000000000000000000000000000000000000000000000000000000000000007fff8000ffffffc03ffffffc07ff801fc0ffe000181ffc000001ffc000003ffc000003ffc000001ffc000001ffc0000c0fff0007e07ffffffe01ffffffe003ffffe0000000000000000000000000000000000000000000000000000000";
+GW[9]["d"] = 42; GT[9]["d"] = 0; GE[9]["d"] = 21; GB[9]["d"] = "00000007f000000007ff00000001ffc00000007ff00000001ffc00000007ff00000001ffc0003ff87ff000fffffffc00ffffffff00fff803ffc07ff8007ff01ffc001ffc0fff0007ff03ffc001ffc0fff0007ff01ffc001ffc07ff0007ff00ffe003ffc01fff8ffff003fffffffc001fffe7fe0000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["e"] = 38; GT[9]["e"] = 7; GE[9]["e"] = 21; GB[9]["e"] = "0000000000000000000000000000000000000000000000000000000000000000000003fffc0000ffffff000fffffff00fff007fe07ff000ffc3ff8001ff0ffffffffc3ffffffff0ffffffff03ff80000007ff0000000ffe0003f01fffc3ffc01fffffff0007ffffc0000000000000000000000000000000000000000000000000000000000";
+GW[9]["f"] = 25; GT[9]["f"] = 0; GE[9]["f"] = 21; GB[9]["f"] = "0007ff803fffc03fffe03ff0003ff8001ffc000ffe0007ffe03fffff1fffff80ffe0007ff0003ff8001ffc000ffe0007ff0003ff8001ffc000ffe0007ff0003ff8000ff8000000000000000000000000000000000000000";
+GW[9]["g"] = 41; GT[9]["g"] = 7; GE[9]["g"] = 27; GB[9]["g"] = "000000000000000000000000000000000000000000000000000000000000000000000000001fff00fc01ffffffff03ffffffff83ff80ffe003ff803ff801ffc01ffc00ffe00ffe003ff80ffe000ffffffe0003fffffc0003efffc00001fc00000000fffffff8003fffffff807ffffffff0fffffffffc7fc00003fe3fe00003ff0fffffffff03fffffffe001ffffff80";
+GW[9]["h"] = 42; GT[9]["h"] = 0; GE[9]["h"] = 21; GB[9]["h"] = "03f800000003ff80000000ffe00000003ff80000000ffe00000003ff80000000ffe00000003ff80ffc000ffe3ffff003fffffffe00fffe03ffc03ffe007ff00fff001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc01ff8007fe0000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["i"] = 19; GT[9]["i"] = 1; GE[9]["i"] = 21; GB[9]["i"] = "000001ffc03ffc07ff80ffe00000000000070007fe01ffc03ff807ff00ffe01ffc03ff807ff00ffe01ffc03ff807ff00ffe00ffc00000000000000000000000000000";
+GW[9]["j"] = 21; GT[9]["j"] = 1; GE[9]["j"] = 27; GB[9]["j"] = "0000001ffc01ffe00fff003ff8000000000000078001ff801ffc00ffe007ff003ff801ffc00ffe007ff003ff801ffc00ffe007ff003ff801ffc00ffe007ff003ff87fff83fff81fff00";
+GW[9]["k"] = 39; GT[9]["k"] = 0; GE[9]["k"] = 21; GB[9]["k"] = "01f80000000ffc0000001ff80000003ff00000007fe0000000ffc0000001ff80000003ff0003e007fe00fff80ffc0fffc01ff8fffc003ff7ffe0007ffffe0000fffff00001fffff00003fffff80007ffbffc000ffc1ffe001ff01fff003fe00fff807fc007ff807f8003ff00000000000000000000000000000000000000000000000000000000000";
+GW[9]["l"] = 19; GT[9]["l"] = 0; GE[9]["l"] = 21; GB[9]["l"] = "03f801ffc03ff807ff00ffe01ffc03ff807ff00ffe01ffc03ff807ff00ffe01ffc03ff807ff00ffe01ffc03ff807ff00ffe00ffc00000000000000000000000000000";
+GW[9]["m"] = 64; GT[9]["m"] = 7; GE[9]["m"] = 21; GB[9]["m"] = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003f803ff000ffe000ffe3ffff0ffffc00ffffffffbfffff00fffe03fffc07ff00fff801ffe007ff80fff001ffc007ff80ffe001ffc007ff80ffe001ffc007ff80ffe001ffc007ff80ffe001ffc007ff80ffe001ffc007ff80ffe001ffc007ff80ffe001ffc007ff80ffe001ffc007ff807fe001ff8003ff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["n"] = 42; GT[9]["n"] = 7; GE[9]["n"] = 21; GB[9]["n"] = "000000000000000000000000000000000000000000000000000000000000000000000000000fe00ffc000ffe3ffff003fffffffe00fffe03ffc03ffe007ff00fff001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc01ff8007fe0000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["o"] = 41; GT[9]["o"] = 7; GE[9]["o"] = 21; GB[9]["o"] = "000000000000000000000000000000000000000000000000000000000000000000000000000ffff00000ffffff8001fffffff803ffc00ffe03ff8003ff81ffc000ffe1ffc0007ff0ffe0003ff87ff0001ffc3ff8000ffe0ffe000fff03ff800fff00ffffffff001ffffffe0001fffff0000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["p"] = 42; GT[9]["p"] = 7; GE[9]["p"] = 27; GB[9]["p"] = "0000000000000000000000000000000000000000000000000000000000000000000000000003803ff80007feffffe003fffffffe00fffc0fffc03ffc007ff80fff000ffe03ffc003ffc0fff000fff03ffc003ffc0fff000ffe03ffc003ff80fff003ffc03fff8fffe00fffffffe003ffffffc000fff00000003ffc0000000fff00000003ffc0000000ffe00000001ff8000000";
+GW[9]["q"] = 42; GT[9]["q"] = 7; GE[9]["q"] = 27; GB[9]["q"] = "00000000000000000000000000000000000000000000000000000000000000000000000000001ff83fe000ffffdffc00ffffffff00fffc0fffc07ff800fff01ffc001ffc07ff0007ff03ffc001ffc0fff0007ff01ffc001ffc07ff0007ff00fff003ffc01fff8ffff003fffffffc001fffe7ff00000001ffc00000007ff00000001ffc00000007ff00000001ffc00000007fe0";
+GW[9]["r"] = 28; GT[9]["r"] = 7; GE[9]["r"] = 21; GB[9]["r"] = "000000000000000000000000000000000000000000000000003f807e0ffe3fe0ffeffe0fffffe0ffff000fff8000fff0000ffe0000ffe0000ffe0000ffe0000ffe0000ffe0000ffe00007fe000000000000000000000000000000000000000000000";
+GW[9]["s"] = 31; GT[9]["s"] = 7; GE[9]["s"] = 21; GB[9]["s"] = "000000000000000000000000000000000000000000000000000000003fffc007fffff83ffffff07f8007c1ff000101fffe0003fffff001fffffc007ffffc0003fffc38000ff87e001ff1ffffffc3ffffff00fffff800000000000000000000000000000000000000000000000";
+GW[9]["t"] = 30; GT[9]["t"] = 4; GE[9]["t"] = 21; GB[9]["t"] = "00000000000000000000000000000001ff80000ffe00003ff80001ffff807fffffe1ffffff803ff80000ffe00003ff80000ffe00003ff80000ffe00003ff80000ffe00003ff806007ffffc01fffff001fffe0000000000000000000000000000000000000000000000";
+GW[9]["u"] = 42; GT[9]["u"] = 8; GE[9]["u"] = 21; GB[9]["u"] = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffe001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc03ff8007ff00ffe001ffc03ff800fff00ffe007ffc01ffc07fff003fffffffc007fffc3fe0000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["v"] = 37; GT[9]["v"] = 8; GE[9]["v"] = 21; GB[9]["v"] = "000000000000000000000000000000000000000000000000000000000000000000000000003ff0003ff1ffc003ff07fe003ff81ff801ff807fe01ff803ff81ff800ffe1ffc003ff1ffc000ffcffc0007ffffc0001ffffc00007fffe00001fffe000007ffc0000000000000000000000000000000000000000000000000000000000";
+GW[9]["w"] = 55; GT[9]["w"] = 8; GE[9]["w"] = 21; GB[9]["w"] = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003fe001ff000ffc7fe007ff001ff87fe00fff007fe0ffe03ffe01ff80ffc0fffe03ff00ffc1fffe0ffc01ffc7f7fc3ff001ff9fcffc7fe001ffff8ffdff8003fffe0ffffe0003fff81ffffc0003fff01ffff00007ffc01fffc00003ff001fff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["x"] = 37; GT[9]["x"] = 8; GE[9]["x"] = 21; GB[9]["x"] = "000000000000000000000000000000000000000000000000000000000000000000000000003ff800ffe0fff01ffe01ffe3ffc003fffff80007ffff00000fffe000001ffc000001fff000003ffff00007feffe000ffe1ffc01ffc07ff83ff800fff1ff8001ff80000000000000000000000000000000000000000000000000000000";
+GW[9]["y"] = 37; GT[9]["y"] = 8; GE[9]["y"] = 27; GB[9]["y"] = "000000000000000000000000000000000000000000000000000000000000000000000000003ff0003ff0ffc003ff03ff803ff80ffe01ff803ff81ff800ffe1ff8003ff9ff8000ffeff80003ffffc0000ffffc00001fffc000007ffc000001ffc0000007fc0000003fe0000003fe0001807fe0001ffffc00007fff800003fff00000";
+GW[9]["z"] = 35; GT[9]["z"] = 8; GE[9]["z"] = 21; GB[9]["z"] = "00000000000000000000000000000000000000000000000000000000000000000000001fffffff83fffffff000007ffc00001ffe00000fff000007ff800003ffc00001ffe00000fff800007ffc00003ffe00000fffffffc3fffffffc3fffffff00000000000000000000000000000000000000000000000000000";
+GW[9]["0"] = 41; GT[9]["0"] = 0; GE[9]["0"] = 22; GB[9]["0"] = "000ffff800003fffffc0007ffffff0007fe00ffe007fe003ff807ff000ffc03ff0007ff03ff8003ff81ffc001ffc0ffe000ffe07ff0007ff03ff8003ff81ffc001ffc0ffe000ffe07ff0007ff03ff8003ff80ffe001ffc07ff001ffc01ffc01ffc007ff81ffc000ffffffc0001fffff0000007ff0000000000000000000000000000000000000000000000000000000";
+GW[9]["1"] = 41; GT[9]["1"] = 0; GE[9]["1"] = 21; GB[9]["1"] = "00001fe0000001fff00000fffff80000fffffc00001f8ffe00000007ff00000003ff80000001ffc0000000ffe00000007ff00000003ff80000001ffc0000000ffe00000007ff00000003ff80000001ffc0000000ffe00000007ff00000003ff800001ffffffc001fffffff000fffffff000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["2"] = 41; GT[9]["2"] = 0; GE[9]["2"] = 21; GB[9]["2"] = "001ffff000007fffff8000fffffff001ffe0fffe01ff800fff807f0003ffc00f0000ffe00000007ff00000007ff80000007ff80000007ff8000000fff0000001ffe0000003ff80000007fe0000000ffc0000003ff00000007fe0000000fffffffc01ffffffff00ffffffffc07fffffffc00000000000000000000000000000000000000000000000000000000000000";
+GW[9]["3"] = 41; GT[9]["3"] = 0; GE[9]["3"] = 22; GB[9]["3"] = "001ffffc0000ffffffc001fffffff801ffc03ffc003e000fff00040007ff80000003ffc0000003ffc0000007ffc00003ffff000001ffff8000007ffff80000000fff00000001ffc0000000fff00000007ff80000003ffc0780001ffe03fc003ffe03fffffffe007ffffffc0007fffff800000fff0000000000000000000000000000000000000000000000000000000";
+GW[9]["4"] = 41; GT[9]["4"] = 0; GE[9]["4"] = 21; GB[9]["4"] = "000007fe0000000fff8000001fffe000001ffff000001ffff800003ffffc00003fe7fe00003fe3ff00007fe1ff80007fc0ffc0007fc07fe000ffc03ff000ff801ff800ff800ffc00fffffffff87ffffffffc3ffffffffe000001ffc0000000ffe00000007ff00000003ff80000000ff8000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["5"] = 41; GT[9]["5"] = 0; GE[9]["5"] = 22; GB[9]["5"] = "00ffffff8001fffffff000fffffff8007ffffff8003ff80000001ffc0000000ffe00000007ff00000003fffffc0001ffffffc000fffffff8007fe00ffe001fc007ff80000003ffc0000001fff0000000fff80300007ff807e0003ffc07fc003ffc03fffffffc007ffffff80007fffff000001ffe0000000000000000000000000000000000000000000000000000000";
+GW[9]["6"] = 41; GT[9]["6"] = 0; GE[9]["6"] = 22; GB[9]["6"] = "0001ffff00000fffffc0001fffffe0003ffe0060003ff80000003ff80000003ffc0000001ffc7ff8001fffffffc00ffffffff807ffe01ffe03ffe007ff01ffe003ffc0fff000ffe07ff8007ff01ffc003ff80ffe001ffc03ff801ffe00ffe01ffe003ffffffe000ffffffc0000fffff8000003ff8000000000000000000000000000000000000000000000000000000";
+GW[9]["7"] = 41; GT[9]["7"] = 0; GE[9]["7"] = 21; GB[9]["7"] = "07fffffff00ffffffffe07ffffffff01ffffffff00000007ff0000000ffe0000000ffc0000001ffc0000003ff80000003ff80000003ff80000003ff80000003ff80000003ffc0000003ffc0000001ffc0000001ffe0000000fff00000007ff00000007ff80000003ffc0000000ffe000000000000000000000000000000000000000000000000000000000000000000";
+GW[9]["8"] = 41; GT[9]["8"] = 0; GE[9]["8"] = 22; GB[9]["8"] = "001ffffc00007fffffe000fffffff800ffe00ffe00ffe003ff807ff001ffc03ff800ffe00ffc007ff003ff807ff0007fffffe0000fffffc0003ffffffc007ff007ff007ff001ffc07ff8007ff03ffc003ff81ffe001ffc07ff001ffe03ffc01ffe00fffffffe001ffffffe0003fffff8000007ff8000000000000000000000000000000000000000000000000000000";
+GW[9]["9"] = 41; GT[9]["9"] = 0; GE[9]["9"] = 22; GB[9]["9"] = "001ffff800007fffff8000fffffff000fff01ffc00ffe007ff00fff001ffc07ff800ffe03ffc007ff81ffe001ffc0fff001ffe03ff800fff01ffe00fff807ffc3fffc00fffffffe001fffefff00001e07ff00000003ff80000003ff8003c007ff8003ffffff8003fffffe0000fffffc000003ff80000000000000000000000000000000000000000000000000000000";
+GW[9]["-"] = 27; GT[9]["-"] = 13; GE[9]["-"] = 15; GB[9]["-"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000003ffff01fffff83fffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+NHL[10] = 32;
+GW[10]["a"] = 44; GT[10]["a"] = 8; GE[10]["a"] = 25; GB[10]["a"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003ffff00000fffffff8001fffffffe001ff001fff001f0000fff80080000fff80000000fff80003ffffff8007fffffff803fff80fff80fff800fff81fff000fff81ffe000fff80fff003fff80fffffffff803ffffffff800ffff87ff00003e000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["b"] = 47; GT[10]["b"] = 0; GE[10]["b"] = 25; GB[10]["b"] = "00fc000000000fff000000001ffe000000003ffc000000007ff800000000fff000000001ffe000000003ffc000000007ff80ffc0000fff3ffffc001ffffffffe003ffff0ffff007ffc001fff00fff8001ffe01fff0003ffe03ffe0007ffc07ffc000fff80fff8001fff01fff0003ffe03ffe0007ffc07ffc001fff00fff8007ffc01fffffffff003ffffffff8003ff9ffff800000001f800000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["c"] = 41; GT[10]["c"] = 8; GE[10]["c"] = 25; GB[10]["c"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000001ffff80001ffffffe003fffffff807fff83ffc07ffc0007c07ff80000007ffc0000003ffe0000001fff0000000fff80000007ffc0000003ffe0000000fff80001e03ffe0007f00ffffffffc01fffffffc000ffffff0000007f80000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["d"] = 47; GT[10]["d"] = 0; GE[10]["d"] = 25; GB[10]["d"] = "000000003f0000000003ffc000000007ff800000000fff000000001ffe000000003ffc000000007ff800000000fff00001ff81ffe0007fffffffc007ffffffff801fffe1ffff007ffc003ffe01ffe0007ffc07ffc000fff80fff8001fff01fff0003ffe03ffe0007ffc07ffc000fff80fff8001fff00fff0003ffe00fff800fffc00fffffffff8007ffffffff0003ffff9ffc00000fc0000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["e"] = 43; GT[10]["e"] = 8; GE[10]["e"] = 25; GB[10]["e"] = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001fffe000007fffffc0007fffffff003fff80fff00fff8007ff03ffc0007ff07ff80007fe1fffffffffe3fffffffff87ffffffffe07ff80000000fff00000000fff00000700fff8000ff00ffffffffe007fffffffc000ffffff8000001fe00000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["f"] = 28; GT[10]["f"] = 0; GE[10]["f"] = 24; GB[10]["f"] = "0000fff000ffff007ffff00fff8101ffe0001ffe0001ffe0001ffe0001ffe001fffffe3fffffe0fffffc01ffe0001ffe0001ffe0001ffe0001ffe0001ffe0001ffe0001ffe0001ffe0001ffe0001ffe0001ffe0000ffe000000000000000000000000000000000000000000000000000";
+GW[10]["g"] = 47; GT[10]["g"] = 8; GE[10]["g"] = 31; GB[10]["g"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003fff001f800fffffffff80ffffffffff03fff0fffc0c0fff003ffc003ffe007ffc007ff8007ff8007ff801ffe000fff003ffc000ffffffff00007ffffff80001ffffff800007e0000000000ffffffe00000ffffffffc001fffffffff007fffffffff03ffffffffff0ffc00000ffe1ff800000ffc3ffc00007ff81fffffffffe00fffffffff0001ffffffe00";
+GW[10]["h"] = 47; GT[10]["h"] = 0; GE[10]["h"] = 24; GB[10]["h"] = "00fc000000000fff000000001ffe000000003ffc000000007ff800000000fff000000001ffe000000003ffc000000007ff803ff0000fff0ffffe001ffeffffff003ffffc7fff007fff003ffe00fffc007ffc01fff000fff803ffe001fff007ffc003ffe00fff8007ffc01fff000fff803ffe001fff007ffc003ffe00fff8007ffc01fff000fff803ffe000fff007ff8001ffe00000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["i"] = 22; GT[10]["i"] = 1; GE[10]["i"] = 24; GB[10]["i"] = "0000000ffe00fffc03fff00fffc00ffe0000000000000000001ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe003ff8000000000000000000000000000000000000000";
+GW[10]["j"] = 24; GT[10]["j"] = 1; GE[10]["j"] = 31; GB[10]["j"] = "00000000ffc003fff003fff003fff000ffc000000000000000000000ffe001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff001fff003ffe0ffffc0ffff80fffc00";
+GW[10]["k"] = 45; GT[10]["k"] = 0; GE[10]["k"] = 24; GB[10]["k"] = "0078000000001ff800000000ffe000000007ff000000003ff800000001ffc00000000ffe000000007ff000000003ff800000001ffc007ffe00ffe01fffe007ff07fff8003ff8ffff0001ffffffc0000ffffff000007ffffe000003fffffc00001ffffff80000ffffffe00007ff0fffc0003ff01fff8001ff803fff000ffc007ffe007fe000fffc03ff0001ffe0000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["l"] = 22; GT[10]["l"] = 0; GE[10]["l"] = 24; GB[10]["l"] = "00fc001ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe007ff801ffe003ff8000000000000000000000000000000000000000";
+GW[10]["m"] = 73; GT[10]["m"] = 8; GE[10]["m"] = 24; GB[10]["m"] = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001fc003ff0000ffc0003ffc3ffff80ffffe001ffeffffff3fffffc00ffffe1fffff87fff007fff003fffc00fff803fff000fff8007ffc01fff0007ffc003ffe00fff8003ffc001fff007ffc001ffe000fff803ffe000fff0007ffc01fff0007ff8003ffe00fff8003ffc001fff007ffc001ffe000fff803ffe000fff0007ffc01fff0007ff8003ffe00fff8003ffc001fff007ff8001ffe0007ff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["n"] = 47; GT[10]["n"] = 8; GE[10]["n"] = 24; GB[10]["n"] = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001fc003ff0000fff0ffffe001ffeffffff003ffffc7fff007fff003ffe00fffc007ffc01fff000fff803ffe001fff007ffc003ffe00fff8007ffc01fff000fff803ffe001fff007ffc003ffe00fff8007ffc01fff000fff803ffe000fff007ff8001ffe00000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["o"] = 47; GT[10]["o"] = 8; GE[10]["o"] = 25; GB[10]["o"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ffff0000007ffffff00007fffffffc003fff807ffe00fff8003ffe03ffe0003ffe07ff80003ffc0fff00007ffc3ffe0000fff87ffc0001fff0fff80003ffe0fff80007ff81fff0001fff01fff800fffc00ffffffffe0007fffffff00001ffffff00000003fe000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["p"] = 47; GT[10]["p"] = 8; GE[10]["p"] = 31; GB[10]["p"] = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffc0000fff3ffffc001ffffffffe003fffffffff007ffc003fff00fff8003ffe01fff0003ffe03ffe0007ffc07ffc000fff80fff8001fff01fff0003ffe03ffe0007ffc07ffc001fff00fff800fffc01fffffffff003ffffffff8007ffdffff8000fff81f800001fff000000003ffe000000007ffc00000000fff800000001fff000000001ff80000000";
+GW[10]["q"] = 47; GT[10]["q"] = 8; GE[10]["q"] = 31; GB[10]["q"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff80ff80007ffff3ffc007ffffffff801fffffffff007ffe007ffe01fff0007ffc07ffc0007ff80fff8000fff01fff0001ffe03ffe0003ffc07ffc0007ff80fff8000fff00fff8001ffe00fff800fffc00fffffffff8007ffffffff0003ffffbffe00000fc07ffc00000000fff800000001fff000000003ffe000000007ffc000000007ff8000000007fe0";
+GW[10]["r"] = 31; GT[10]["r"] = 8; GE[10]["r"] = 24; GB[10]["r"] = "0000000000000000000000000000000000000000000000000000000000000000fc007c0fff0ffc1ffe7ff83ffffff07ffffe00ffff0001fff80003ffe00007ff80000fff00001ffe00003ffc00007ff80000fff00001ffe00003ffc00003ff8000000000000000000000000000000000000000000000000000000000";
+GW[10]["s"] = 36; GT[10]["s"] = 8; GE[10]["s"] = 25; GB[10]["s"] = "000000000000000000000000000000000000000000000000000000000000000000000000003fffe0003ffffff00fffffff81ffc01ff01ff8000f01ffc000001fffff0000ffffff8003fffffe000ffffff80007ffffc000001ffc1f00007fc1ff000ffc3fffffff81fffffff003fffffc00001fe000000000000000000000000000000000000000000000000000000000";
+GW[10]["t"] = 34; GT[10]["t"] = 4; GE[10]["t"] = 25; GB[10]["t"] = "0000000000000000000000000000000000007fc000007ff800001ffe000007ff800001fff0000fffffff87ffffffe07fffffe001ffe000007ff800001ffe000007ff800001ffe000007ff800001ffe000007ff800001ffe000007ffc07800ffffff003fffffc003ffff80000fc000000000000000000000000000000000000000000000000000000";
+GW[10]["u"] = 47; GT[10]["u"] = 9; GE[10]["u"] = 25; GB[10]["u"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fff0003ffc01fff0007ff803ffe001fff007ffc003ffe00fff8007ffc01fff000fff803ffe001fff007ffc003ffe00fff8007ffc01fff000fff803ffe001fff007ffc003ffe00fff800fffc01fff00ffff801fffffefff000fffff1ffe00003f80000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["v"] = 42; GT[10]["v"] = 9; GE[10]["v"] = 24; GB[10]["v"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffe0000ffe3ffc0007ff87ff8003ffc0ffe000ffe01ffc007ff007ff803ffc00fff01ffe001ffe0fff0003ff83ff8000fff1ffc0001ffefff00003fffff800007ffffc00000ffffe000003ffff0000003fff80000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["w"] = 63; GT[10]["w"] = 9; GE[10]["w"] = 24; GB[10]["w"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007ff0003fe0003ff8fff000ffe000ffe0ffe003ffe001ffc1ffe00fffe007ff01ffe01fffc01ffc01ffc07fffc07ff803ffc1ffffc0ffe003ffc3fdff83ff8003ff8ff3ff8fff0007ffbfc3ff9ffc0007ffff87ff7ff00007fffe07ffffe0000ffff807ffff80000ffff00ffffe00000fffc00ffffc00000fff000fffe00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["x"] = 42; GT[10]["x"] = 9; GE[10]["x"] = 24; GB[10]["x"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fff0003ff81fff003ffe01fff03ffe001fff3ffe0001fffffe00001ffffe000001fffe0000001ffe0000000fffe000000ffffe00000fffffe0000fff1ffe000fff03ffe00fff803ffe0fff8003ffe3ff80003ff80000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["y"] = 42; GT[10]["y"] = 9; GE[10]["y"] = 31; GB[10]["y"] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffe0000ffe1ffe0007ff83ffc003ffc07ff800ffe00fff007ff001ffe03ff8003ffc1ffc0007ff8fff0000fff3ff80001fffffc00001ffffe000003ffff0000007fff8000000fffe0000001fff00000003ff80000000ffc00000007fe00000003ff00001f07ff800007ffffc00001ffffc000003fff000000";
+GW[10]["z"] = 40; GT[10]["z"] = 9; GE[10]["z"] = 24; GB[10]["z"] = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffc0ffffffffc07fffffff8000003ffe000000fffc000003fff000000fffc000003fff000000fffc000003fff000000fffc000003fff000000fffc000001ffffffff83ffffffffc1ffffffffc0000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["0"] = 47; GT[10]["0"] = 0; GE[10]["0"] = 25; GB[10]["0"] = "0003ffff8000003fffffe00001fffffff8000fff007ff8003ffc007ff800fff0007ff801ffe0007ff807ff8000fff00fff0001ffe01ffe0003ffe07ffc0007ffc0fff8000fff81fff0001fff03ffe0003ffe07ffc0007ffc0fff8000fff80fff0001fff01ffe0003ffc03ffe0007ff803ffc001fff007ff8003ffc007ff800fff0007ffe0fffc0003ffffffe00000ffffff0000001fffc00000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["1"] = 47; GT[10]["1"] = 0; GE[10]["1"] = 24; GB[10]["1"] = "000001fc000000007ffc000007fffff800001ffffff000001fffffe000000007ffc00000000fff800000001fff000000003ffe000000007ffc00000000fff800000001fff000000003ffe000000007ffc00000000fff800000001fff000000003ffe000000007ffc00000000fff800000001fff000000003ffe000000007ffc000001fffffffc0007fffffffc000ffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["2"] = 47; GT[10]["2"] = 0; GE[10]["2"] = 24; GB[10]["2"] = "0007fffe000000ffffffc00007fffffff0003ffffffff800fff003fff801ff8001fff801fc0001fff000f80001fff000000003ffe00000000fff800000003fff00000000fffc00000003ffe00000001fff00000000fff80000000fff800000007ff800000003ff800000001ffc00000001ffc00000000ffe000000007ffffffff803fffffffff807fffffffff007ffffffffc00000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["3"] = 47; GT[10]["3"] = 0; GE[10]["3"] = 25; GB[10]["3"] = "0007ffff800000fffffff00007fffffff8003fffc7fff8003fe001fff8003e0001fff000000003ffe00000000fffc00000001fff00000000fffc000003ffffe000000ffffe0000001fffff800000001fffe000000003fff000000003fff000000003ffe000000007ffc00000000fff803000001fff00fc00007ffe01ffc003fff803ffffffffe001ffffffff00007ffffff0000003fffc00000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["4"] = 47; GT[10]["4"] = 0; GE[10]["4"] = 24; GB[10]["4"] = "0000007fc000000007fff00000003fffe0000000ffffc0000003ffff8000000fffff0000007feffe000001ff9ffc00000ffe3ff800003ff07ff00000ffc0ffe00003ff01ffc0001ff803ff80007fe007ff0001ff800ffe000ffe001ffc003ffffffffff07ffffffffff0ffffffffffe07fffffffff80000007ff800000000fff000000001ffe000000003ffc000000003ff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["5"] = 47; GT[10]["5"] = 0; GE[10]["5"] = 25; GB[10]["5"] = "003ffffff00003fffffffc0007fffffffc000ffffffff0001fffffff80003ffc000000007ff800000000fff000000001ffe000000003ffffff000007ffffffe0000ffffffff0001fff01fff8003ff001fff0003f8001fff000000003fff000000007ffe00000000fffc00000001fff801e00003ffe00ff0000fffc03ffc007fff003ffffffffc001fffffffe00007fffffe0000007fff800000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["6"] = 47; GT[10]["6"] = 0; GE[10]["6"] = 25; GB[10]["6"] = "00003ffff0000007fffff000007ffffff00003ffff1fc0000fff800000007ffc00000000fff000000003ffe00000000fff87ffc0001fff7ffff8003ffffffffc007fffc07ffc00fffe003ffc01fff8007ffc03ffe000fff807ffc001fff00fff8003fff01fff0007ffe01ffe000fff803ffe001fff003ffc003ffe003ffe01fff8003fffffffc0001fffffff00000ffffff0000000fffe00000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["7"] = 47; GT[10]["7"] = 0; GE[10]["7"] = 25; GB[10]["7"] = "03ffffffff001fffffffffc03fffffffffc07fffffffff007ffffffffc00000001ffe00000000fff000000003ffc00000001ffe000000007ff800000003ffe00000000fff000000003ffc00000000fff000000003ffe00000000fff800000003ffe000000007ffc00000001fff000000003ffe00000000fffc00000001fff000000003ffe000000007ffc00000000fff8000000003f80000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["8"] = 47; GT[10]["8"] = 0; GE[10]["8"] = 25; GB[10]["8"] = "0007ffffc000007ffffff00003fffffffc001fffe3fffc003ffc007ffc00fff0007ff801ffe000fff003ffc001ffe007ff8003ffc007ff800fff0003fffffff80000ffffff800003ffffff80003fff8fffe001fff001fff007ffc001fff00fff8003ffe01fff0007ffc03ffe000fff807ffc001fff00fff8003ffe00fffc01fff800ffffffffe0007fffffff00003ffffff8000003fffe00000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["9"] = 47; GT[10]["9"] = 0; GE[10]["9"] = 25; GB[10]["9"] = "0003ffff0000007fffffe00003fffffff0001fffe3fff8007ffc00fff801fff000fff803ffe000fff007ffc001fff00fff8003ffe01fff0007ffc03ffe000fff807ffc001fff80fff8007fff00fff801fffe00fffe3ffff8007ffffffff0003ffff3ffe00003fe07ffc00000000fff000000003ffc00000001fff0000f800fffc0007fffffff0000fffffff80000ffffff8000000fffe000000000000000000000000000000000000000000000000000000000000000000000000000";
+GW[10]["-"] = 31; GT[10]["-"] = 15; GE[10]["-"] = 18; GB[10]["-"] = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fffffc07fffffe0ffffff801ffff8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+NHL.n = 11;
+
+MACHINE = "localhost";   # install.sh writes this machine's name here
+MODE = Plymouth.GetMode();
+HALT = (MODE == "shutdown" || MODE == "reboot");
+
+# ---- the character grid --------------------------------------------------------
+best = 99999;
+for (i = 0; i < FSL.n; i++) {
+    if (Math.Abs(FSL[i] - SH / 60) < best) {
+        best = Math.Abs(FSL[i] - SH / 60);
+        FS = FSL[i];
+        FADV = FSA[i];
+        FLH = FSH[i];
+    }
+}
+font_load("ink", "font-ink-" + FS + ".png", FADV, FLH, FADV, FLH, 0);
+font_load("acc", "font-acc-" + FS + ".png", FADV, FLH, FADV, FLH, 0);
+font_load("lit", "font-lit-" + FS + ".png", FADV, FLH, FADV, FLH, 0);
+COLS = Math.Int(SW / FADV);
+ROWS = Math.Int(SH / FLH);
+OX = SX + Math.Int((SW - COLS * FADV) / 2);
+OY = SY + Math.Int((SH - ROWS * FLH) / 2);
+N = COLS * ROWS;
+BAND = ROWS - 9;                 # the bottom rows: question, answer, messages
+R_PROMPT = BAND + 1;
+R_PREV = BAND + 3;
+R_ENTRY = BAND + 4;
+R_NOTE = BAND + 6;
+R_MSG = BAND + 8;
+
+O_NOISE = 0.085;                 # opacities (the atlases are all bright)
+O_QUIET = 0.04;                  # noise right around the name
+O_OUTLINE = 0.45;                # the letters at power-off: their ground, faint noise
+O_NEW = 1;
+O_OLD = 0.85;
+O_OUT_NEW = 0.32;                # text that no longer fits into the letters
+O_OUT_OLD = 0.22;
+O_DIM = 0.4;
+
+# every cell is one sprite; CODE, FID and OPA remember what it shows
+NOISE = "!#$%&()*+-/0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz{|}~";
+NC = txt_codes(NOISE);
+for (i = 0; i < N; i++) {
+    NG[i] = NC[Math.Int(rnd() * NC.n)];
+    G[i] = Sprite(glyph("ink", NG[i]));
+    G[i].SetPosition(OX + (i % COLS) * FADV, OY + Math.Int(i / COLS) * FLH, 1);
+    G[i].SetOpacity(O_NOISE);
+    CODE[i] = NG[i];
+    FID[i] = "ink";
+    OPA[i] = O_NOISE;
+}
+MASK[0] = 0;                     # cells inside the letters of the name
+BT[0] = 0;                       # band cells that hold text
+
+fun put(i, fid, code, op) {
+    if (CODE[i] != code || FID[i] != fid) {
+        G[i].SetImage(glyph(fid, code));
+        CODE[i] = code;
+        FID[i] = fid;
+    }
+    if (OPA[i] != op) {
+        G[i].SetOpacity(op);
+        OPA[i] = op;
+    }
+}
+
+fun unput(i) {
+    if (HALT && MASK[i]) { put(i, "lit", NG[i], O_OUTLINE); return; }
+    if (QUIET[i]) put(i, "ink", NG[i], O_QUIET);
+    else put(i, "ink", NG[i], O_NOISE);
+}
+
+# ---- the name, in big letters made of cells --------------------------------------
+HEXV["0"] = 0; HEXV["1"] = 1; HEXV["2"] = 2; HEXV["3"] = 3; HEXV["4"] = 4;
+HEXV["5"] = 5; HEXV["6"] = 6; HEXV["7"] = 7; HEXV["8"] = 8; HEXV["9"] = 9;
+HEXV["a"] = 10; HEXV["b"] = 11; HEXV["c"] = 12; HEXV["d"] = 13; HEXV["e"] = 14; HEXV["f"] = 15;
+HEXV["A"] = 10; HEXV["B"] = 11; HEXV["C"] = 12; HEXV["D"] = 13; HEXV["E"] = 14; HEXV["F"] = 15;
+BIT[0] = 1; BIT[1] = 2; BIT[2] = 4; BIT[3] = 8;
+
+fun bits_of(hex, n) {
+    local.s = "";
+    local.k = 0;
+    local.v = 0;
+    local.b = 0;
+    for (k = 0; k * 4 < n; k++) {
+        v = HEXV[hex.CharAt(k)];
+        for (b = 3; b >= 0 && k * 4 + 3 - b < n; b--) {
+            if (Math.Int(v / BIT[b]) % 2) s = s + "1";
+            else s = s + "0";
+        }
+    }
+    return s;
+}
+
+fun width_of(s, hi) {
+    local.w = 0;
+    local.k = 0;
+    local.c = "";
+    for (k = 0; k < s.Length(); k++) {
+        c = s.CharAt(k);
+        if (GW[hi][c]) w = w + GW[hi][c];
+    }
+    return w;
+}
+
+# the rows of the letter box that s actually inks (no descender, no room for one)
+fun ink_of(s, hi) {
+    local.k = 0;
+    local.c = "";
+    global.R0 = 999;
+    global.R1 = -1;
+    for (k = 0; k < s.Length(); k++) {
+        c = s.CharAt(k);
+        if (GW[hi][c]) {
+            if (GT[hi][c] < R0) global.R0 = GT[hi][c];
+            if (GE[hi][c] > R1) global.R1 = GE[hi][c];
+        }
+    }
+    return R1 - R0 + 1;
+}
+
+AREA = BAND - 2;                 # rows 1 .. BAND - 2 hold the name
+if (width_of(MACHINE, 0) == 0) MACHINE = "localhost";
+# one line, or two split at the hyphen nearest the middle: whichever is bigger
+H1 = -1;
+for (i = 0; i < NHL.n; i++)
+    if (ink_of(MACHINE, i) <= AREA - 2 && width_of(MACHINE, i) <= COLS - 6) H1 = i;
+CUT = -1;
+for (k = 1; k < MACHINE.Length() - 1; k++)
+    if (MACHINE.CharAt(k) == "-" &&
+        (CUT < 0 || Math.Abs(k - MACHINE.Length() / 2) < Math.Abs(CUT - MACHINE.Length() / 2))) CUT = k;
+LA = MACHINE.SubString(0, CUT + 1);
+LB = MACHINE.SubString(CUT + 1, MACHINE.Length());
+H2 = -1;
+if (CUT > 0)
+    for (i = 0; i < NHL.n; i++)
+        if (2 * ink_of(MACHINE, i) + 1 <= AREA - 2 &&
+            width_of(LA, i) <= COLS - 6 && width_of(LB, i) <= COLS - 6) H2 = i;
+if (H2 > H1) {
+    LINE[0] = LA;
+    LINE[1] = LB;
+    LINES = 2;
+    HI = H2;
+} else {
+    # one line; a name too long even for the smallest letters is cut short
+    while (H1 < 0 && MACHINE.Length() > 1) {
+        MACHINE = MACHINE.SubString(0, MACHINE.Length() - 1);
+        if (width_of(MACHINE, 0) <= COLS - 6) H1 = 0;
+    }
+    if (H1 < 0) H1 = 0;
+    LINE[0] = MACHINE;
+    LINES = 1;
+    HI = H1;
+}
+NH = NHL[HI];
+UH = ink_of(MACHINE, HI);        # sets R0, R1 for all lines alike
+TOP = 1 + Math.Int((AREA - (LINES * UH + LINES - 1)) / 2);
+SLOT.n = 0;                      # the cells of the letters, in reading order
+QUIET[0] = 0;                    # the box around the name, where the noise is fainter
+for (L = 0; L < LINES; L++) {
+    NK = 0;
+    for (k = 0; k < LINE[L].Length(); k++) {
+        c = LINE[L].CharAt(k);
+        if (GW[HI][c]) {
+            NWK[NK] = GW[HI][c];
+            NB[NK] = bits_of(GB[HI][c], NH * GW[HI][c]);
+            NK++;
+        }
+    }
+    LW = width_of(LINE[L], HI);
+    NX0 = Math.Int((COLS - LW) / 2);
+    NY0 = TOP + L * (UH + 1) - R0;
+    for (r = R0 - 1; r <= R1 + 1; r++)
+        for (x = NX0 - 2; x < NX0 + LW + 2; x++)
+            if (r + NY0 >= 0 && x >= 0 && x < COLS) QUIET[(NY0 + r) * COLS + x] = 1;
+    for (r = R0; r <= R1; r++) {
+        x = NX0;
+        for (k = 0; k < NK; k++) {
+            row = NB[k].SubString(r * NWK[k], (r + 1) * NWK[k]);
+            for (c = 0; c < NWK[k]; c++)
+                if (row.CharAt(c) == "1") {
+                    i = (NY0 + r) * COLS + x + c;
+                    MASK[i] = 1;
+                    SLOT[SLOT.n] = i;
+                    SLOT.n++;
+                }
+            x = x + NWK[k];
+        }
+    }
+}
+
+for (i = 0; i < N; i++) if (QUIET[i]) put(i, "ink", NG[i], O_QUIET);
+
+# ---- writing: the names systemd reports, in that order ---------------------------
+QC[0] = 0;                       # queued character codes
+QN = 0;
+QR = 0;
+SP = 0;                          # next cell inside the letters
+OVP = 0;                         # next cell outside them
+LIMIT = (BAND - 1) * COLS;       # text stays above the band
+RING[0] = 0;                     # the cells written last, to let them age
+RINGIN[0] = 0;
+RINGC[0] = 0;
+RN = 0;
+AGE_N = 140;
+WC = 0;
+WIN = 0;
+
+SUFFIX["service"] = 1; SUFFIX["socket"] = 1; SUFFIX["target"] = 1; SUFFIX["path"] = 1;
+SUFFIX["timer"] = 1; SUFFIX["device"] = 1; SUFFIX["slice"] = 1; SUFFIX["scope"] = 1;
+SUFFIX["mount"] = 2; SUFFIX["automount"] = 2; SUFFIX["swap"] = 2;      # these name paths
+
+fun unhex2(h) {
+    local.v = 16 * HEXV[h.CharAt(0)] + HEXV[h.CharAt(1)];
+    if (v >= 32 && v < 127) return TXT.ascii.CharAt(v - 32);
+    return "?";
+}
+
+# "systemd-cryptsetup@luks\x2d3f2a.service" -> "systemd-cryptsetup@luks-3f2a",
+# "dev-zram0.swap" -> "/dev/zram0"; anything that is not a unit name -> ""
+fun clean(s) {
+    local.n = s.Length();
+    local.d = -1;
+    local.k = 0;
+    local.kind = 0;
+    local.base = "";
+    local.out = "";
+    local.c = "";
+    for (k = n - 1; k > 0 && d < 0; k--) if (s.CharAt(k) == ".") d = k;
+    if (d <= 0) return "";
+    kind = SUFFIX[s.SubString(d + 1, n)];
+    if (!kind) return "";
+    base = s.SubString(0, d);
+    for (k = 0; k < base.Length(); k++) {
+        c = base.CharAt(k);
+        if (c == "\\" && base.CharAt(k + 1) == "x") {
+            out = out + unhex2(base.SubString(k + 2, k + 4));
+            k = k + 3;
+        } else if (kind == 2 && c == "-") {
+            out = out + "/";
+        } else {
+            out = out + c;
+        }
+    }
+    if (kind == 2 && out != "/") out = "/" + out;
+    return txt_fit(out, 40);
+}
+
+fun enqueue(word) {
+    local.c = txt_codes(word);
+    local.k = 0;
+    if (QN > 0) {
+        QC[QN] = 32;
+        global.QN++;
+    }
+    for (k = 0; k < c.n; k++) {
+        QC[QN] = c[k];
+        global.QN++;
+    }
+}
+
+fun next_cell() {
+    if (SP < SLOT.n) {
+        global.WC = SLOT[SP];
+        global.SP++;
+        global.WIN = 1;
+        return 1;
+    }
+    while (OVP < LIMIT && MASK[OVP]) global.OVP++;
+    if (OVP >= LIMIT) return 0;
+    global.WC = OVP;
+    global.OVP++;
+    global.WIN = 0;
+    return 1;
+}
+
+fun write_code(code) {
+    local.j = 0;
+    local.slot = RN % AGE_N;
+    if (!next_cell()) return;
+    if (WIN) {
+        if (code == 32) put(WC, "lit", 250, O_NEW);      # a dot between two names
+        else put(WC, "lit", code, O_NEW);
+    } else {
+        if (code == 32) put(WC, "ink", 32, 1);
+        else put(WC, "ink", code, O_OUT_NEW);
+    }
+    if (RN >= AGE_N && (RINGC[slot] != 32 || RINGIN[slot])) {
+        j = RING[slot];
+        if (RINGIN[slot]) put(j, FID[j], CODE[j], O_OLD);
+        else put(j, FID[j], CODE[j], O_OUT_OLD);
+    }
+    RING[slot] = WC;
+    RINGIN[slot] = WIN;
+    RINGC[slot] = code;
+    global.RN++;
+}
+
+fun on_status(status) {
+    local.w = clean(status);
+    if (w != "") enqueue(w);
+}
+
+NCUR = Sprite(glyph("ink", 95));
+NCUR.SetOpacity(0);
+NCUR_SHOWN = 0;
+fun place_cursor() {
+    local.i = -1;
+    if (SP < SLOT.n) i = SLOT[SP];
+    else if (OVP < LIMIT) i = OVP;
+    if (i < 0) { global.NCUR_OK = 0; return; }
+    global.NCUR_OK = 1;
+    NCUR.SetPosition(OX + (i % COLS) * FADV, OY + Math.Int(i / COLS) * FLH, 3);
+}
+NCUR_OK = 1;
+place_cursor();
+
+# ---- the band: the question, your answer as far as the theme knows it -----------
+BANDON = 0;
+LC = 2;                          # first column of the band lines
+BCUR = Sprite(glyph("acc", 95));
+BCUR.SetOpacity(0);
+BCUR_ON = 0;
+BCUR_SHOWN = 0;
+
+fun band_on() {
+    local.i = 0;
+    if (BANDON) return;
+    global.BANDON = 1;
+    for (i = BAND * COLS; i < N; i++) put(i, "ink", 32, 1);
+}
+
+# write s into a band row from column LC; returns the column after it
+fun line(row, s, fid, op) {
+    local.c = txt_codes(s);
+    local.k = 0;
+    local.i = row * COLS;
+    for (k = 0; k < COLS; k++) {
+        if (k >= LC && k - LC < c.n && k < COLS - 1) {
+            put(i + k, fid, c[k - LC], op);
+            BT[i + k] = (c[k - LC] != 32);
+        } else {
+            put(i + k, "ink", 32, 1);
+            BT[i + k] = 0;
+        }
+    }
+    return LC + c.n;
+}
+
+fun line_opacity(row, op) {
+    local.k = 0;
+    local.i = row * COLS;
+    for (k = 0; k < COLS; k++) if (BT[i + k]) put(i + k, FID[i + k], CODE[i + k], op);
+}
+
+fun band_cursor(row, col, fid) {
+    BCUR.SetImage(glyph(fid, 95));
+    BCUR.SetPosition(OX + col * FADV, OY + row * FLH, 3);
+    global.BCUR_ON = 1;
+}
+
+fun repeat(s, n) {
+    local.out = "";
+    local.k = 0;
+    if (n > Math.Int((COLS - LC - 3) / 2)) n = Math.Int((COLS - LC - 3) / 2);
+    for (k = 0; k < n; k++) out = out + s;
+    return out;
+}
+
+P.active = 0;                    # 1 = passphrase, 2 = question
+P.prompt = "";
+P.last = "";
+P.answered = 0;
+P.bullets = -1;
+P.lastn = 0;
+P.caps = -1;
+
+fun note() {
+    if (P.caps == 1) { line(R_NOTE, "caps lock is on.", "acc", 0.75); return; }
+    if (P.bullets <= 0) { line(R_NOTE, "", "ink", 1); return; }
+    if (P.bullets == 1) line(R_NOTE, "1 character. I see how many, never which.", "ink", O_DIM);
+    else line(R_NOTE, P.bullets + " characters. I see how many, never which.", "ink", O_DIM);
+}
+
+fun set_column(prompt) {
+    global.LC = Math.Max(2, Math.Int((COLS - txt_len(txt_fit(prompt, COLS - 4))) / 2));
+}
+
+fun on_password(prompt, bullets) {
+    local.col = 0;
+    if (P.active != 1) {
+        band_on();
+        if (prompt == "") prompt = "passphrase:";
+        set_column(prompt);
+        line(R_PROMPT, txt_fit(prompt, COLS - 4), "acc", 1);
+        # the same question again right after an answer: that was not it
+        if (P.answered && prompt == P.last) line(R_PREV, repeat("- ", P.lastn), "acc", 0.45);
+        P.active = 1;
+        P.prompt = prompt;
+        P.bullets = -1;
+        P.caps = -1;
+    }
+    if (bullets != P.bullets) {
+        P.bullets = bullets;
+        col = line(R_ENTRY, repeat("* ", bullets), "acc", 1);
+        band_cursor(R_ENTRY, col, "acc");
+        note();
+    }
+}
+
+fun on_question(prompt, entry) {
+    local.col = 0;
+    if (P.active != 2) {
+        band_on();
+        set_column(prompt);
+        line(R_PROMPT, txt_fit(prompt, COLS - 4), "acc", 1);
+        line(R_PREV, "", "ink", 1);
+        line(R_NOTE, "", "ink", 1);
+        P.active = 2;
+    }
+    col = line(R_ENTRY, txt_fit(entry, COLS - LC - 3), "acc", 1);
+    band_cursor(R_ENTRY, col, "acc");
+}
+
+fun on_normal() {
+    if (P.active == 1) {
+        P.answered = 1;
+        P.last = P.prompt;
+        P.lastn = P.bullets;
+    }
+    if (P.active) {
+        line_opacity(R_PROMPT, O_DIM);
+        line_opacity(R_PREV, 0.25);
+        line_opacity(R_ENTRY, O_DIM);
+        line(R_NOTE, "", "ink", 1);
+        global.BCUR_ON = 0;
+        P.active = 0;
+    }
+}
+
+MSGT = 0;
+fun msg_off() {
+    local.k = 0;
+    if (BANDON) line(R_MSG, "", "ink", 1);
+    else for (k = R_MSG * COLS; k < (R_MSG + 1) * COLS; k++) unput(k);
+    global.MSGT = 0;
+}
+
+fun on_message(text) {
+    line(R_MSG, txt_fit(text, COLS - LC - 2), "ink", 0.5);
+    global.MSGT = 250;
+}
+
+fun on_hide_message(text) {
+    msg_off();
+}
+
+# ---- power-off: nothing is reported any more ----------------------------------------
+if (HALT) {
+    for (k = 0; k < SLOT.n; k++) unput(SLOT[k]);
+    band_on();
+    LC = Math.Max(2, Math.Int((COLS - 24) / 2));
+    if (MODE == "reboot") line(R_PROMPT, "reboot", "ink", O_DIM);
+    else line(R_PROMPT, "power-off", "ink", O_DIM);
+    band_cursor(R_ENTRY, line(R_ENTRY, "the rest is on the disk.", "ink", 1), "ink");
+}
+
+# ---- main loop -------------------------------------------------------------------------
+FRAME = 0;
+BLINK = 0;
+fun refresh() {
+    local.k = 0;
+    local.m = QN - QR;
+    local.show = 0;
+    global.FRAME++;
+    global.BLINK = (BLINK + 1) % 50;
+    if (m > 0) {
+        k = 1 + Math.Int(m / 8);
+        if (k > 40) k = 40;
+        while (k > 0 && QR < QN) {
+            write_code(QC[QR]);
+            global.QR++;
+            k--;
+        }
+        place_cursor();
+    }
+    show = (NCUR_OK && !P.active && !HALT && BLINK < 25);
+    if (show != NCUR_SHOWN) {
+        NCUR.SetOpacity(show);
+        global.NCUR_SHOWN = show;
+    }
+    show = (BCUR_ON && BLINK < 25);
+    if (show != BCUR_SHOWN) {
+        BCUR.SetOpacity(show);
+        global.BCUR_SHOWN = show;
+    }
+    if (P.active == 1 && FRAME % 10 == 0) {
+        k = 0;
+        if (Plymouth.GetCapslockState()) k = 1;
+        if (k != P.caps) {
+            P.caps = k;
+            note();
+        }
+    }
+    if (MSGT > 0) {
+        global.MSGT--;
+        if (MSGT == 0) msg_off();
+    }
+}
+
+Plymouth.SetRefreshFunction(refresh);
+Plymouth.SetUpdateStatusFunction(on_status);
+Plymouth.SetDisplayPasswordFunction(on_password);
+Plymouth.SetDisplayQuestionFunction(on_question);
+Plymouth.SetDisplayNormalFunction(on_normal);
+Plymouth.SetDisplayMessageFunction(on_message);
+Plymouth.SetHideMessageFunction(on_hide_message);
