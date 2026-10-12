@@ -1,0 +1,56 @@
+name: checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build:
+    # themes/ must be exactly what src/ builds, with the pinned Pillow and the
+    # Latin Modern fonts of Ubuntu 24.04 (fonts-lmodern 2.005)
+    runs-on: ubuntu-24.04  # the image these checks were verified on; ubuntu-latest becomes 26.04 from 19 Oct 2026
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install the font and Pillow
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-lmodern
+          python -m pip install -r requirements.txt
+      - name: Build every theme
+        run: python src/build.py
+      - name: themes/ matches its generators
+        run: |
+          git status --porcelain themes/
+          test -z "$(git status --porcelain themes/)"
+      - name: Shell syntax
+        run: |
+          for s in install.sh preview.sh bench/*.sh; do
+            bash -n "$s" || exit 1
+          done
+  smoke:
+    # every theme through a LUKS boot and a power-off, in Xvfb, at three sizes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        geometry: [1366x768, 1920x1080, 3840x2160]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Plymouth with its X11 renderer, Xvfb and xdotool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends plymouth plymouth-x11 xvfb xdotool imagemagick
+      - name: Smoke test
+        run: sudo bench/smoke.sh -g ${{ matrix.geometry }} -m luks -m shutdown -k smoke-out
+      - name: Keep screenshots and logs of a failed run
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: smoke-${{ matrix.geometry }}
+          path: smoke-out

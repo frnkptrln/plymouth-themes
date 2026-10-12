@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=ECA
+Description=An elementary cellular automaton, computed live at every boot
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/eca
+ScriptFile=/usr/share/plymouth/themes/eca/eca.script

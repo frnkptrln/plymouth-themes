@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Epicycles
+Description=Circles riding on circles draw a key: a Fourier series that sharpens as you type
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/epicycles
+ScriptFile=/usr/share/plymouth/themes/epicycles/epicycles.script

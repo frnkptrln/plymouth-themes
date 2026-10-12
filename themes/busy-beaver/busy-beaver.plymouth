@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Busy Beaver
+Description=The 5-state busy beaver champion runs live; it would halt after 47,176,870 steps
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/busy-beaver
+ScriptFile=/usr/share/plymouth/themes/busy-beaver/busy-beaver.script

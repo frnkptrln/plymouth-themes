@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Waterfall
+Description=The 433 MHz band on a software radio; your keystrokes go out as LoRa chirps
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/waterfall
+ScriptFile=/usr/share/plymouth/themes/waterfall/waterfall.script

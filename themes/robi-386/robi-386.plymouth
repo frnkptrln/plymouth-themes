@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=ROBI 386
+Description=A 1992 PC boots Linux: VGA text mode, POST, DOS prompt, LOADLIN, LUKS via UNLOCK.BAT
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/robi-386
+ScriptFile=/usr/share/plymouth/themes/robi-386/robi-386.script

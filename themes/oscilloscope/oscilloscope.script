@@ -1,0 +1,657 @@
+# =============================================================================
+#  OSCILLOSCOPE — Lissajous figures on green phosphor.
+#
+#  The beam runs through frequency ratios (3:2, 4:3, 5:4 ...), the phase
+#  drifts, and the trace fades like on a P31 tube. Every keystroke disturbs
+#  the signal; after Enter the figure locks to 1:1, a circle. If the prompt
+#  comes back (wrong passphrase), the circle is torn apart. At power-off the
+#  picture collapses like on an old tube.
+#
+#  Claude, October 2026 — for Frank
+# =============================================================================
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+SW = Window.GetWidth();
+SH = Window.GetHeight();
+SX = Window.GetX();
+SY = Window.GetY();
+PI = 3.14159265358979;
+
+#==============================================================================
+# glyph text engine — bitmap font from PNG atlases (IBM VGA 8x16, CP437)
+#==============================================================================
+TXT.ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+for (TXT.i = 0; TXT.i < 95; TXT.i++) TXT.ord[TXT.ascii.CharAt(TXT.i)] = 32 + TXT.i;
+TXT.u8["☺"] = 1;
+TXT.u8["☻"] = 2;
+TXT.u8["♥"] = 3;
+TXT.u8["♦"] = 4;
+TXT.u8["♣"] = 5;
+TXT.u8["♠"] = 6;
+TXT.u8["•"] = 7;
+TXT.u8["◘"] = 8;
+TXT.u8["○"] = 9;
+TXT.u8["◙"] = 10;
+TXT.u8["♂"] = 11;
+TXT.u8["♀"] = 12;
+TXT.u8["♪"] = 13;
+TXT.u8["♫"] = 14;
+TXT.u8["☼"] = 15;
+TXT.u8["►"] = 16;
+TXT.u8["◄"] = 17;
+TXT.u8["↕"] = 18;
+TXT.u8["‼"] = 19;
+TXT.u8["¶"] = 20;
+TXT.u8["§"] = 21;
+TXT.u8["▬"] = 22;
+TXT.u8["↨"] = 23;
+TXT.u8["↑"] = 24;
+TXT.u8["↓"] = 25;
+TXT.u8["→"] = 26;
+TXT.u8["←"] = 27;
+TXT.u8["∟"] = 28;
+TXT.u8["↔"] = 29;
+TXT.u8["▲"] = 30;
+TXT.u8["▼"] = 31;
+TXT.u8["⌂"] = 127;
+TXT.u8["Ç"] = 128;
+TXT.u8["ü"] = 129;
+TXT.u8["é"] = 130;
+TXT.u8["â"] = 131;
+TXT.u8["ä"] = 132;
+TXT.u8["à"] = 133;
+TXT.u8["å"] = 134;
+TXT.u8["ç"] = 135;
+TXT.u8["ê"] = 136;
+TXT.u8["ë"] = 137;
+TXT.u8["è"] = 138;
+TXT.u8["ï"] = 139;
+TXT.u8["î"] = 140;
+TXT.u8["ì"] = 141;
+TXT.u8["Ä"] = 142;
+TXT.u8["Å"] = 143;
+TXT.u8["É"] = 144;
+TXT.u8["æ"] = 145;
+TXT.u8["Æ"] = 146;
+TXT.u8["ô"] = 147;
+TXT.u8["ö"] = 148;
+TXT.u8["ò"] = 149;
+TXT.u8["û"] = 150;
+TXT.u8["ù"] = 151;
+TXT.u8["ÿ"] = 152;
+TXT.u8["Ö"] = 153;
+TXT.u8["Ü"] = 154;
+TXT.u8["¢"] = 155;
+TXT.u8["£"] = 156;
+TXT.u8["¥"] = 157;
+TXT.u8["₧"] = 158;
+TXT.u8["ƒ"] = 159;
+TXT.u8["á"] = 160;
+TXT.u8["í"] = 161;
+TXT.u8["ó"] = 162;
+TXT.u8["ú"] = 163;
+TXT.u8["ñ"] = 164;
+TXT.u8["Ñ"] = 165;
+TXT.u8["ª"] = 166;
+TXT.u8["º"] = 167;
+TXT.u8["¿"] = 168;
+TXT.u8["⌐"] = 169;
+TXT.u8["¬"] = 170;
+TXT.u8["½"] = 171;
+TXT.u8["¼"] = 172;
+TXT.u8["¡"] = 173;
+TXT.u8["«"] = 174;
+TXT.u8["»"] = 175;
+TXT.u8["░"] = 176;
+TXT.u8["▒"] = 177;
+TXT.u8["▓"] = 178;
+TXT.u8["│"] = 179;
+TXT.u8["┤"] = 180;
+TXT.u8["╡"] = 181;
+TXT.u8["╢"] = 182;
+TXT.u8["╖"] = 183;
+TXT.u8["╕"] = 184;
+TXT.u8["╣"] = 185;
+TXT.u8["║"] = 186;
+TXT.u8["╗"] = 187;
+TXT.u8["╝"] = 188;
+TXT.u8["╜"] = 189;
+TXT.u8["╛"] = 190;
+TXT.u8["┐"] = 191;
+TXT.u8["└"] = 192;
+TXT.u8["┴"] = 193;
+TXT.u8["┬"] = 194;
+TXT.u8["├"] = 195;
+TXT.u8["─"] = 196;
+TXT.u8["┼"] = 197;
+TXT.u8["╞"] = 198;
+TXT.u8["╟"] = 199;
+TXT.u8["╚"] = 200;
+TXT.u8["╔"] = 201;
+TXT.u8["╩"] = 202;
+TXT.u8["╦"] = 203;
+TXT.u8["╠"] = 204;
+TXT.u8["═"] = 205;
+TXT.u8["╬"] = 206;
+TXT.u8["╧"] = 207;
+TXT.u8["╨"] = 208;
+TXT.u8["╤"] = 209;
+TXT.u8["╥"] = 210;
+TXT.u8["╙"] = 211;
+TXT.u8["╘"] = 212;
+TXT.u8["╒"] = 213;
+TXT.u8["╓"] = 214;
+TXT.u8["╫"] = 215;
+TXT.u8["╪"] = 216;
+TXT.u8["┘"] = 217;
+TXT.u8["┌"] = 218;
+TXT.u8["█"] = 219;
+TXT.u8["▄"] = 220;
+TXT.u8["▌"] = 221;
+TXT.u8["▐"] = 222;
+TXT.u8["▀"] = 223;
+TXT.u8["α"] = 224;
+TXT.u8["ß"] = 225;
+TXT.u8["Γ"] = 226;
+TXT.u8["π"] = 227;
+TXT.u8["Σ"] = 228;
+TXT.u8["σ"] = 229;
+TXT.u8["µ"] = 230;
+TXT.u8["τ"] = 231;
+TXT.u8["Φ"] = 232;
+TXT.u8["Θ"] = 233;
+TXT.u8["Ω"] = 234;
+TXT.u8["δ"] = 235;
+TXT.u8["∞"] = 236;
+TXT.u8["φ"] = 237;
+TXT.u8["ε"] = 238;
+TXT.u8["∩"] = 239;
+TXT.u8["≡"] = 240;
+TXT.u8["±"] = 241;
+TXT.u8["≥"] = 242;
+TXT.u8["≤"] = 243;
+TXT.u8["⌠"] = 244;
+TXT.u8["⌡"] = 245;
+TXT.u8["÷"] = 246;
+TXT.u8["≈"] = 247;
+TXT.u8["°"] = 248;
+TXT.u8["∙"] = 249;
+TXT.u8["·"] = 250;
+TXT.u8["√"] = 251;
+TXT.u8["ⁿ"] = 252;
+TXT.u8["²"] = 253;
+TXT.u8["■"] = 254;
+TXT.u8[" "] = 255;
+
+# Turn a string into an array of CP437 codes (out.n = length). out.off[k] is
+# the byte offset where glyph k starts, out.off[out.n] the length in bytes:
+# Plymouth's string functions count bytes, and "•" alone is three of them.
+fun txt_codes(s) {
+    local.out.n = 0;
+    local.i = 0;
+    local.k = 0;
+    local.c = s.CharAt(0);
+    while (c != "") {
+        out.off[out.n] = i;
+        k = TXT.ord[c];
+        if (k) { out[out.n] = k; out.n++; i++; }
+        else {
+            k = TXT.u8[s.SubString(i, i + 3)];
+            if (k) { out[out.n] = k; out.n++; i += 3; }
+            else {
+                k = TXT.u8[s.SubString(i, i + 2)];
+                if (k) { out[out.n] = k; out.n++; i += 2; }
+                else { out[out.n] = 63; out.n++; i++; }
+            }
+        }
+        c = s.CharAt(i);
+    }
+    out.off[out.n] = i;
+    return out;
+}
+
+# Number of glyphs a string renders to.
+fun txt_len(s) {
+    local.c = txt_codes(s);
+    return c.n;
+}
+
+# Load a font atlas. fid: short id, file: atlas PNG, cw/ch: atlas cell size,
+# adv: horizontal advance, lh: line height, pad: glow margin around each glyph.
+FONT.count = 0;     # must exist at top level so functions see the globals
+GLYPH.count = 0;
+
+fun font_load(fid, file, cw, ch, adv, lh, pad) {
+    global.FONT[fid].atlas = Image(file);
+    global.FONT[fid].cw = cw;
+    global.FONT[fid].ch = ch;
+    global.FONT[fid].adv = adv;
+    global.FONT[fid].lh = lh;
+    global.FONT[fid].pad = pad;
+}
+
+fun glyph(fid, code) {
+    if (!GLYPH[fid][code])
+        global.GLYPH[fid][code] = FONT[fid].atlas.Crop((code % 16) * FONT[fid].cw,
+                                                Math.Int(code / 16) * FONT[fid].ch,
+                                                FONT[fid].cw, FONT[fid].ch);
+    return GLYPH[fid][code];
+}
+
+# Create sprites for a string at (x, y). Returns a run object; drop it to erase.
+fun txt_run(fid, s, x, y, z) {
+    local.codes = txt_codes(s);
+    local.r.n = codes.n;
+    local.r.w = codes.n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < codes.n; i++) {
+        if (codes[i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+# Same, from an already decoded code array (from index a, count n).
+fun txt_run_codes(fid, codes, a, n, x, y, z) {
+    local.r.n = n;
+    local.r.w = n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < n; i++) {
+        if (codes[a + i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[a + i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+fun run_opacity(r, o) {
+    local.i = 0;
+    for (i = 0; i < r.n; i++) if (r.sp[i]) r.sp[i].SetOpacity(o);
+}
+
+fun run_move(r, x, y) {
+    local.i = 0;
+    local.fid = 0;
+    for (i = 0; i < r.n; i++)
+        if (r.sp[i]) r.sp[i].SetPosition(x + (r.sp[i].GetX() - r.x), y + (r.sp[i].GetY() - r.y), r.sp[i].GetZ());
+    r.x = x;
+    r.y = y;
+}
+
+# Shorten s to at most n glyphs by cutting out the middle, at glyph
+# boundaries, so a multi-byte character is never split.
+fun txt_fit(s, n) {
+    local.c = txt_codes(s);
+    local.h = 0;
+    if (c.n <= n) return s;
+    if (n < 5) return s.SubString(0, c.off[n]);
+    h = Math.Int((n - 3) / 2);
+    return s.SubString(0, c.off[h]) + "..." + s.SubString(c.off[c.n - (n - 3 - h)], c.off[c.n]);
+}
+
+# Uniform random number in [0, 1). Plymouth 24's Math.Random() returns values
+# scaled down by 2^32; normalise so this also works if that ever gets fixed.
+fun rnd() {
+    local.r = Math.Random();
+    if (r < 0.000001) r = r * 4294967296;
+    return r - Math.Int(r);
+}
+
+# Pick the largest integer scale (from 1..maxs) at which a cols x rows grid of
+# (cw x lh) cells still fits into w x h.
+fun pick_scale(w, h, cw, lh, cols, rows, maxs) {
+    local.s = maxs;
+    while (s > 1 && (cols * cw * s > w || rows * lh * s > h)) s--;
+    return s;
+}
+
+
+# ---- geometry ---------------------------------------------------------------
+GRL[0] = 320;
+GRL[1] = 400;
+GRL[2] = 480;
+GRL[3] = 560;
+GRL[4] = 640;
+GRL[5] = 720;
+GRL[6] = 800;
+GRL[7] = 960;
+GRL[8] = 1120;
+GRL[9] = 1280;
+GRL[10] = 1600;
+GRL.n = 11;
+GH = GRL[0];
+best = 99999;
+for (i = 0; i < GRL.n; i++) {
+    d = Math.Abs(GRL[i] - SH * 0.68);
+    if (d < best) { best = d; GH = GRL[i]; }
+}
+GW = Math.Int(GH * 5 / 4);
+if (GW > SW * 0.92) {
+    # very narrow screens: shrink to fit the width
+    for (i = 0; i < GRL.n; i++) if (Math.Int(GRL[i] * 5 / 4) <= SW * 0.92) GH = GRL[i];
+    GW = Math.Int(GH * 5 / 4);
+}
+GX = SX + Math.Int((SW - GW) / 2);
+GY = SY + Math.Int((SH - GH) / 2) - Math.Int(SH * 0.015);
+GRAT = Sprite(Image("graticule-" + GH + ".png"));
+GRAT.SetPosition(GX, GY, 0);
+CX = GX + GW / 2;
+CY = GY + GH / 2;
+AX = GH * 0.42;          # same deflection on both channels: 1:1 is a true circle
+AY = GH * 0.42;
+
+TS = 1;
+if (SH >= 1500) TS = 2;
+if (SH >= 2600) TS = 3;
+font_load("g", "vga-g-" + TS + ".png", 9 * TS, 16 * TS, 9 * TS, 16 * TS, 0);
+font_load("d", "vga-d-" + TS + ".png", 9 * TS, 16 * TS, 9 * TS, 16 * TS, 0);
+ADV = 9 * TS;
+LH = 16 * TS;
+Y_TOP = GY - Math.Int(LH * 1.7);
+Y_B1 = GY + GH + Math.Int(LH * 0.9);
+Y_B2 = Y_B1 + Math.Int(LH * 1.4);
+
+# ---- beam -------------------------------------------------------------------
+DRL[0] = 3;
+DRL[1] = 4;
+DRL[2] = 5;
+DRL[3] = 6;
+DRL[4] = 7;
+DRL[5] = 8;
+DRL[6] = 10;
+DRL[7] = 12;
+DRL.n = 8;
+DR = DRL[0];
+best = 99999;
+for (i = 0; i < DRL.n; i++) {
+    d = Math.Abs(DRL[i] - SH / 190);
+    if (d < best) { best = d; DR = DRL[i]; }
+}
+DOT = Image("dot-" + DR + ".png");
+DH = DOT.GetWidth() / 2;
+HEAD = Image("head-" + DR + ".png");
+HH = HEAD.GetWidth() / 2;
+
+N = 900;           # trail length (sprites)
+K = 6;             # new points per frame
+L = 10;            # fade levels
+for (i = 0; i < N; i++) {
+    TR[i] = Sprite(DOT);
+    TR[i].SetPosition(-200, -200, 2);
+    TR[i].SetOpacity(0);
+}
+for (k = 1; k < L; k++) {
+    AGE[k] = Math.Int((k * N + L - 1) / L);
+    f = 1 - k / L;
+    OPL[k] = 0.02 + 0.98 * f * f * f;
+}
+RING = 0;
+HS = Sprite(HEAD);
+HS.SetPosition(-200, -200, 3);
+
+RA[0] = 3; RB[0] = 2;
+RA[1] = 1; RB[1] = 2;
+RA[2] = 4; RB[2] = 3;
+RA[3] = 2; RB[3] = 3;
+RA[4] = 5; RB[4] = 4;
+RA[5] = 3; RB[5] = 1;
+RA[6] = 5; RB[6] = 3;
+RA[7] = 1; RB[7] = 1;
+RA[8] = 3; RB[8] = 4;
+RA[9] = 2; RB[9] = 1;
+RN = 10;
+RI = 0;
+TA = RA[0];
+TB = RB[0];
+FA = TA;
+FB = TB;
+QX = 0;            # phase accumulators
+QY = 0;
+PHI = 0;
+DPHI = 2 * PI / 1400;          # slow drift: the figure seems to turn in space
+DQ = 2 * PI / 150 / K;         # one period of the base frequency every 3 s
+NZ = 0;            # noise amplitude (fraction of the deflection), wrong passphrase
+NW = 0;            # interference from typing: a fast wiggle on both channels
+WQ = 0;
+W1 = 0;
+W2 = 0;
+LOCK = 0;          # 1: forced to 1:1 -> circle
+FRAME = 0;
+NEXTSW = 700;
+
+MODE = Plymouth.GetMode();
+SHUT = 0;
+if (MODE == "shutdown" || MODE == "reboot") SHUT = 1;
+SHT = 0;
+SXF = 1;
+SYF = 1;
+
+fun beam_point(x, y) {
+    local.k = 0;
+    TR[RING].SetPosition(CX + AX * x * SXF - DH, CY - AY * y * SYF - DH, 2);
+    TR[RING].SetOpacity(1);
+    for (k = 1; k < L; k++) TR[(RING - AGE[k] + N) % N].SetOpacity(OPL[k]);
+    global.RING = (RING + 1) % N;
+}
+
+# ---- readouts ---------------------------------------------------------------
+fun dec2(v) {
+    local.p = Math.Int(v * 100 + 0.5);
+    local.r = p % 100;
+    local.s = "" + r;
+    if (r < 10) s = "0" + s;
+    return Math.Int(p / 100) + "." + s;
+}
+
+TOP_L = txt_run("d", "CH1 0.5V/div  CH2 0.5V/div  X-Y", GX, Y_TOP, 5);
+SHOWN_R = "";
+fun draw_ratio() {
+    local.v = (PHI / PI) % 2;
+    if (v < 0) v = v + 2;
+    local.s = TA + ":" + TB + "   φ" + dec2(v) + "π";
+    if (LOCK) s = "1:1   LOCK";
+    if (SHUT) s = "OFF";
+    if (s == SHOWN_R) return;
+    global.SHOWN_R = s;
+    global.TOP_R = txt_run("g", s, GX + GW - txt_len(s) * ADV, Y_TOP, 5);
+}
+
+# ---- password / question ----------------------------------------------------
+P.active = 0;
+P.bullets = -1;
+P.prompt = "";
+P.last = "";
+P.answered = 0;
+P.err = 0;
+P.blink = 0;
+P.caps = 0;
+P.grace = 0;
+MSG.t = 0;
+
+# a keystroke couples into the probes: the trace wiggles, but stays one line
+fun interfere() {
+    global.NW = Math.Min(0.075, NW + 0.04);
+    global.W1 = rnd() * 6.28;
+    global.W2 = rnd() * 6.28;
+}
+
+fun draw_entry(s) {
+    local.t = txt_fit(s, Math.Int(GW / ADV) - 3);
+    global.ENTRY_R = txt_run("g", "> " + t, GX, Y_B2, 6);
+    global.CURSOR_R = txt_run("g", "_", GX + (txt_len(t) + 2) * ADV, Y_B2, 6);
+}
+
+fun on_password(prompt, bullets) {
+    local.s = "";
+    local.i = 0;
+    local.n = 0;
+    if (P.active != 1) {
+        if (P.answered && prompt == P.last) {
+            # the passphrase was wrong: tear the circle apart
+            P.err = 200;
+            global.NZ = 1.3;
+            global.LOCK = 0;
+            global.RI = Math.Int(rnd() * RN);
+            global.TA = RA[RI];
+            global.TB = RB[RI];
+        }
+        P.active = 1;
+        P.prompt = prompt;
+        P.bullets = -1;
+        P.grace = 0;
+        if (prompt == "") prompt = "Passphrase:";
+        global.PROMPT_R = txt_run("d", txt_fit(prompt, Math.Int(GW / ADV)), GX, Y_B1, 6);
+        global.MSG_R = NULL;
+    }
+    if (bullets > P.bullets && P.bullets >= 0) interfere();
+    if (bullets != P.bullets) {
+        P.bullets = bullets;
+        n = bullets;
+        if (n > 32) n = 32;
+        for (i = 0; i < n; i++) s = s + "•";
+        draw_entry(s);
+    }
+}
+
+fun on_question(prompt, entry) {
+    if (P.active != 2) {
+        P.active = 2;
+        P.err = 0;
+        global.ERR_R = NULL;
+        global.PROMPT_R = txt_run("d", txt_fit(prompt, Math.Int(GW / ADV)), GX, Y_B1, 6);
+    }
+    draw_entry(entry);
+    interfere();
+}
+
+fun on_normal() {
+    if (P.active == 1) {
+        P.answered = 1;
+        P.last = P.prompt;
+        global.LOCK = 1;          # optimistic: lock to a circle
+        P.grace = 250;
+    }
+    P.active = 0;
+    P.bullets = -1;
+    global.PROMPT_R = NULL;
+    global.ENTRY_R = NULL;
+    global.CURSOR_R = NULL;
+    global.CAPS_R = NULL;
+    P.caps = 0;
+}
+
+fun on_message(text) {
+    if (P.active) return;
+    global.MSG_R = txt_run("d", txt_fit(text, Math.Int(GW / ADV)), GX, Y_B1, 6);
+    MSG.t = 250;
+}
+
+fun on_hide_message(text) {
+    global.MSG_R = NULL;
+}
+
+# ---- main loop --------------------------------------------------------------
+fun refresh() {
+    local.k = 0;
+    local.x = 0;
+    local.y = 0;
+    local.dd = 0;
+    local.tgt = 0;
+    global.FRAME++;
+
+    # which figure
+    if (!LOCK && !SHUT && FRAME >= NEXTSW) {
+        global.RI = (RI + 1) % RN;
+        global.TA = RA[RI];
+        global.TB = RB[RI];
+        global.NEXTSW = FRAME + 700;
+    }
+    if (LOCK) { global.TA = 1; global.TB = 1; }
+    global.FA = FA + (TA - FA) * 0.025;
+    global.FB = FB + (TB - FB) * 0.025;
+
+    # phase: drift, or pull the relative phase to pi/2 for a clean circle
+    if (LOCK) {
+        dd = QX + PHI - QY;
+        tgt = PI / 2 + 2 * PI * Math.Int((dd - PI / 2) / (2 * PI) + 0.5);
+        global.PHI = PHI + (tgt - dd) * 0.06;
+    } else {
+        global.PHI = PHI + DPHI;
+    }
+
+    # power off: collapse to a line, then to a dot, then fade
+    if (SHUT) {
+        global.SHT++;
+        if (SHT > 60) global.SYF = Math.Max(0, 1 - (SHT - 60) / 45);
+        if (SHT > 105) global.SXF = Math.Max(0, 1 - (SHT - 105) / 35);
+        if (SHT > 140) HS.SetOpacity(Math.Max(0, 1 - (SHT - 140) / 60));
+    }
+
+    for (k = 0; k < K; k++) {
+        global.QX = QX + FA * DQ;
+        global.QY = QY + FB * DQ;
+        x = Math.Sin(QX + PHI);
+        y = Math.Sin(QY);
+        if (NW > 0.002) {
+            # small phase steps per sample, so neighbouring dots stay touching
+            global.WQ = WQ + 0.18;
+            x = x + NW * Math.Sin(WQ + W1);
+            y = y + NW * Math.Sin(WQ * 1.37 + W2);
+        }
+        if (NZ > 0.002) {
+            x = x + NZ * (rnd() - 0.5);
+            y = y + NZ * (rnd() - 0.5);
+        }
+        beam_point(x, y);
+    }
+    HS.SetPosition(CX + AX * x * SXF - HH, CY - AY * y * SYF - HH, 3);
+    global.NZ = NZ * 0.94;
+    global.NW = NW * 0.95;
+
+    if (FRAME % 20 == 0) draw_ratio();
+
+    if (P.grace > 0) P.grace--;
+    if (LOCK && P.grace == 0 && !P.active && FRAME % 600 == 0) global.LOCK = 0;
+
+    if (P.active) {
+        P.blink = (P.blink + 1) % 50;
+        if (CURSOR_R) run_opacity(CURSOR_R, P.blink < 25);
+        if (P.active == 1 && P.blink % 10 == 0) {
+            if (Plymouth.GetCapslockState()) {
+                if (!P.caps) global.CAPS_R = txt_run("g", "CAPS", GX + GW - 4 * ADV, Y_B2, 6);
+                P.caps = 1;
+            } else {
+                P.caps = 0;
+                global.CAPS_R = NULL;
+            }
+        }
+    }
+    if (P.err > 0) {
+        # on the entry line, left of the CAPS indicator: the prompt line above can be full
+        if (!ERR_R) global.ERR_R = txt_run("g", "wrong. try again.", GX + GW - 23 * ADV, Y_B2, 6);
+        P.err--;
+        run_opacity(ERR_R, (P.err % 30) < 20);
+        if (P.err == 0) global.ERR_R = NULL;
+    }
+    if (MSG.t > 0) {
+        MSG.t--;
+        if (MSG.t == 0) global.MSG_R = NULL;
+    }
+}
+
+draw_ratio();
+Plymouth.SetRefreshFunction(refresh);
+Plymouth.SetDisplayPasswordFunction(on_password);
+Plymouth.SetDisplayQuestionFunction(on_question);
+Plymouth.SetDisplayNormalFunction(on_normal);
+Plymouth.SetDisplayMessageFunction(on_message);
+Plymouth.SetHideMessageFunction(on_hide_message);

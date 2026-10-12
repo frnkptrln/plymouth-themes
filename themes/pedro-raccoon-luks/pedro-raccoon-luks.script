@@ -1,0 +1,483 @@
+# =============================================================================
+#  Pedro Raccoon — LUKS edition
+#
+#  Animation: "Pedro Raccoon Plymouth" (opendesktop.org/p/2148515), unchanged.
+#  Added: passphrase / question / message display for encrypted disks, drawn
+#  with a bitmap font so it needs nothing from the initramfs besides this
+#  folder. Pedro dances faster while you type.
+#  Fixed: the original loaded frames 1..197 into slots 1..197 and played slot
+#  0 (empty) once per loop, so frame 198 never showed and one frame was blank.
+#
+#  Claude, October 2026 — for Frank
+# =============================================================================
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+SW = Window.GetWidth();
+SH = Window.GetHeight();
+SX = Window.GetX();
+SY = Window.GetY();
+
+#==============================================================================
+# glyph text engine — bitmap font from PNG atlases (IBM VGA 8x16, CP437)
+#==============================================================================
+TXT.ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+for (TXT.i = 0; TXT.i < 95; TXT.i++) TXT.ord[TXT.ascii.CharAt(TXT.i)] = 32 + TXT.i;
+TXT.u8["☺"] = 1;
+TXT.u8["☻"] = 2;
+TXT.u8["♥"] = 3;
+TXT.u8["♦"] = 4;
+TXT.u8["♣"] = 5;
+TXT.u8["♠"] = 6;
+TXT.u8["•"] = 7;
+TXT.u8["◘"] = 8;
+TXT.u8["○"] = 9;
+TXT.u8["◙"] = 10;
+TXT.u8["♂"] = 11;
+TXT.u8["♀"] = 12;
+TXT.u8["♪"] = 13;
+TXT.u8["♫"] = 14;
+TXT.u8["☼"] = 15;
+TXT.u8["►"] = 16;
+TXT.u8["◄"] = 17;
+TXT.u8["↕"] = 18;
+TXT.u8["‼"] = 19;
+TXT.u8["¶"] = 20;
+TXT.u8["§"] = 21;
+TXT.u8["▬"] = 22;
+TXT.u8["↨"] = 23;
+TXT.u8["↑"] = 24;
+TXT.u8["↓"] = 25;
+TXT.u8["→"] = 26;
+TXT.u8["←"] = 27;
+TXT.u8["∟"] = 28;
+TXT.u8["↔"] = 29;
+TXT.u8["▲"] = 30;
+TXT.u8["▼"] = 31;
+TXT.u8["⌂"] = 127;
+TXT.u8["Ç"] = 128;
+TXT.u8["ü"] = 129;
+TXT.u8["é"] = 130;
+TXT.u8["â"] = 131;
+TXT.u8["ä"] = 132;
+TXT.u8["à"] = 133;
+TXT.u8["å"] = 134;
+TXT.u8["ç"] = 135;
+TXT.u8["ê"] = 136;
+TXT.u8["ë"] = 137;
+TXT.u8["è"] = 138;
+TXT.u8["ï"] = 139;
+TXT.u8["î"] = 140;
+TXT.u8["ì"] = 141;
+TXT.u8["Ä"] = 142;
+TXT.u8["Å"] = 143;
+TXT.u8["É"] = 144;
+TXT.u8["æ"] = 145;
+TXT.u8["Æ"] = 146;
+TXT.u8["ô"] = 147;
+TXT.u8["ö"] = 148;
+TXT.u8["ò"] = 149;
+TXT.u8["û"] = 150;
+TXT.u8["ù"] = 151;
+TXT.u8["ÿ"] = 152;
+TXT.u8["Ö"] = 153;
+TXT.u8["Ü"] = 154;
+TXT.u8["¢"] = 155;
+TXT.u8["£"] = 156;
+TXT.u8["¥"] = 157;
+TXT.u8["₧"] = 158;
+TXT.u8["ƒ"] = 159;
+TXT.u8["á"] = 160;
+TXT.u8["í"] = 161;
+TXT.u8["ó"] = 162;
+TXT.u8["ú"] = 163;
+TXT.u8["ñ"] = 164;
+TXT.u8["Ñ"] = 165;
+TXT.u8["ª"] = 166;
+TXT.u8["º"] = 167;
+TXT.u8["¿"] = 168;
+TXT.u8["⌐"] = 169;
+TXT.u8["¬"] = 170;
+TXT.u8["½"] = 171;
+TXT.u8["¼"] = 172;
+TXT.u8["¡"] = 173;
+TXT.u8["«"] = 174;
+TXT.u8["»"] = 175;
+TXT.u8["░"] = 176;
+TXT.u8["▒"] = 177;
+TXT.u8["▓"] = 178;
+TXT.u8["│"] = 179;
+TXT.u8["┤"] = 180;
+TXT.u8["╡"] = 181;
+TXT.u8["╢"] = 182;
+TXT.u8["╖"] = 183;
+TXT.u8["╕"] = 184;
+TXT.u8["╣"] = 185;
+TXT.u8["║"] = 186;
+TXT.u8["╗"] = 187;
+TXT.u8["╝"] = 188;
+TXT.u8["╜"] = 189;
+TXT.u8["╛"] = 190;
+TXT.u8["┐"] = 191;
+TXT.u8["└"] = 192;
+TXT.u8["┴"] = 193;
+TXT.u8["┬"] = 194;
+TXT.u8["├"] = 195;
+TXT.u8["─"] = 196;
+TXT.u8["┼"] = 197;
+TXT.u8["╞"] = 198;
+TXT.u8["╟"] = 199;
+TXT.u8["╚"] = 200;
+TXT.u8["╔"] = 201;
+TXT.u8["╩"] = 202;
+TXT.u8["╦"] = 203;
+TXT.u8["╠"] = 204;
+TXT.u8["═"] = 205;
+TXT.u8["╬"] = 206;
+TXT.u8["╧"] = 207;
+TXT.u8["╨"] = 208;
+TXT.u8["╤"] = 209;
+TXT.u8["╥"] = 210;
+TXT.u8["╙"] = 211;
+TXT.u8["╘"] = 212;
+TXT.u8["╒"] = 213;
+TXT.u8["╓"] = 214;
+TXT.u8["╫"] = 215;
+TXT.u8["╪"] = 216;
+TXT.u8["┘"] = 217;
+TXT.u8["┌"] = 218;
+TXT.u8["█"] = 219;
+TXT.u8["▄"] = 220;
+TXT.u8["▌"] = 221;
+TXT.u8["▐"] = 222;
+TXT.u8["▀"] = 223;
+TXT.u8["α"] = 224;
+TXT.u8["ß"] = 225;
+TXT.u8["Γ"] = 226;
+TXT.u8["π"] = 227;
+TXT.u8["Σ"] = 228;
+TXT.u8["σ"] = 229;
+TXT.u8["µ"] = 230;
+TXT.u8["τ"] = 231;
+TXT.u8["Φ"] = 232;
+TXT.u8["Θ"] = 233;
+TXT.u8["Ω"] = 234;
+TXT.u8["δ"] = 235;
+TXT.u8["∞"] = 236;
+TXT.u8["φ"] = 237;
+TXT.u8["ε"] = 238;
+TXT.u8["∩"] = 239;
+TXT.u8["≡"] = 240;
+TXT.u8["±"] = 241;
+TXT.u8["≥"] = 242;
+TXT.u8["≤"] = 243;
+TXT.u8["⌠"] = 244;
+TXT.u8["⌡"] = 245;
+TXT.u8["÷"] = 246;
+TXT.u8["≈"] = 247;
+TXT.u8["°"] = 248;
+TXT.u8["∙"] = 249;
+TXT.u8["·"] = 250;
+TXT.u8["√"] = 251;
+TXT.u8["ⁿ"] = 252;
+TXT.u8["²"] = 253;
+TXT.u8["■"] = 254;
+TXT.u8[" "] = 255;
+
+# Turn a string into an array of CP437 codes (out.n = length). out.off[k] is
+# the byte offset where glyph k starts, out.off[out.n] the length in bytes:
+# Plymouth's string functions count bytes, and "•" alone is three of them.
+fun txt_codes(s) {
+    local.out.n = 0;
+    local.i = 0;
+    local.k = 0;
+    local.c = s.CharAt(0);
+    while (c != "") {
+        out.off[out.n] = i;
+        k = TXT.ord[c];
+        if (k) { out[out.n] = k; out.n++; i++; }
+        else {
+            k = TXT.u8[s.SubString(i, i + 3)];
+            if (k) { out[out.n] = k; out.n++; i += 3; }
+            else {
+                k = TXT.u8[s.SubString(i, i + 2)];
+                if (k) { out[out.n] = k; out.n++; i += 2; }
+                else { out[out.n] = 63; out.n++; i++; }
+            }
+        }
+        c = s.CharAt(i);
+    }
+    out.off[out.n] = i;
+    return out;
+}
+
+# Number of glyphs a string renders to.
+fun txt_len(s) {
+    local.c = txt_codes(s);
+    return c.n;
+}
+
+# Load a font atlas. fid: short id, file: atlas PNG, cw/ch: atlas cell size,
+# adv: horizontal advance, lh: line height, pad: glow margin around each glyph.
+FONT.count = 0;     # must exist at top level so functions see the globals
+GLYPH.count = 0;
+
+fun font_load(fid, file, cw, ch, adv, lh, pad) {
+    global.FONT[fid].atlas = Image(file);
+    global.FONT[fid].cw = cw;
+    global.FONT[fid].ch = ch;
+    global.FONT[fid].adv = adv;
+    global.FONT[fid].lh = lh;
+    global.FONT[fid].pad = pad;
+}
+
+fun glyph(fid, code) {
+    if (!GLYPH[fid][code])
+        global.GLYPH[fid][code] = FONT[fid].atlas.Crop((code % 16) * FONT[fid].cw,
+                                                Math.Int(code / 16) * FONT[fid].ch,
+                                                FONT[fid].cw, FONT[fid].ch);
+    return GLYPH[fid][code];
+}
+
+# Create sprites for a string at (x, y). Returns a run object; drop it to erase.
+fun txt_run(fid, s, x, y, z) {
+    local.codes = txt_codes(s);
+    local.r.n = codes.n;
+    local.r.w = codes.n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < codes.n; i++) {
+        if (codes[i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+# Same, from an already decoded code array (from index a, count n).
+fun txt_run_codes(fid, codes, a, n, x, y, z) {
+    local.r.n = n;
+    local.r.w = n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < n; i++) {
+        if (codes[a + i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[a + i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+fun run_opacity(r, o) {
+    local.i = 0;
+    for (i = 0; i < r.n; i++) if (r.sp[i]) r.sp[i].SetOpacity(o);
+}
+
+fun run_move(r, x, y) {
+    local.i = 0;
+    local.fid = 0;
+    for (i = 0; i < r.n; i++)
+        if (r.sp[i]) r.sp[i].SetPosition(x + (r.sp[i].GetX() - r.x), y + (r.sp[i].GetY() - r.y), r.sp[i].GetZ());
+    r.x = x;
+    r.y = y;
+}
+
+# Shorten s to at most n glyphs by cutting out the middle, at glyph
+# boundaries, so a multi-byte character is never split.
+fun txt_fit(s, n) {
+    local.c = txt_codes(s);
+    local.h = 0;
+    if (c.n <= n) return s;
+    if (n < 5) return s.SubString(0, c.off[n]);
+    h = Math.Int((n - 3) / 2);
+    return s.SubString(0, c.off[h]) + "..." + s.SubString(c.off[c.n - (n - 3 - h)], c.off[c.n]);
+}
+
+# Uniform random number in [0, 1). Plymouth 24's Math.Random() returns values
+# scaled down by 2^32; normalise so this also works if that ever gets fixed.
+fun rnd() {
+    local.r = Math.Random();
+    if (r < 0.000001) r = r * 4294967296;
+    return r - Math.Int(r);
+}
+
+# Pick the largest integer scale (from 1..maxs) at which a cols x rows grid of
+# (cw x lh) cells still fits into w x h.
+fun pick_scale(w, h, cw, lh, cols, rows, maxs) {
+    local.s = maxs;
+    while (s > 1 && (cols * cw * s > w || rows * lh * s > h)) s--;
+    return s;
+}
+
+
+# ---- font -------------------------------------------------------------------
+S = 1;
+if (SH >= 900) S = 2;
+if (SH >= 1500) S = 3;
+if (SH >= 2000) S = 4;
+SS = S - 1;                      # smaller size for the system prompt
+if (SS < 1) SS = 1;
+font_load("w", "font-w-" + S + ".png", 9 * S, 16 * S, 9 * S, 16 * S, 0);
+font_load("r", "font-r-" + SS + ".png", 9 * SS, 16 * SS, 9 * SS, 16 * SS, 0);
+font_load("g", "font-g-" + SS + ".png", 9 * SS, 16 * SS, 9 * SS, 16 * SS, 0);
+ADV = 9 * S;
+LH = 16 * S;
+MAXC = Math.Int(SW * 0.92 / ADV);
+MAXCS = Math.Int(SW * 0.92 / (9 * SS));
+
+# ---- animation --------------------------------------------------------------
+anim.count = 198;
+for (i = 0; i < anim.count; i++)
+    anim.img[i] = Image("animation-" + (i + 1) + ".png");
+anim.zoom = 1;
+if (SH >= 1700) anim.zoom = 2;
+anim.size = anim.img[0].GetWidth() * anim.zoom;
+anim.sprite = Sprite();
+anim.sprite.SetPosition(SX + SW / 2 - anim.size / 2, SY + SH / 2 - anim.size / 2, 0);
+anim.idx = 169;          # like the original: start near the end of the loop
+anim.shown = -1;
+anim.acc = 0;
+anim.boost = 0;          # extra frames to dance through (typing)
+
+fun anim_step() {
+    local.speed = 0.5;   # 25 fps at plymouth's 50 Hz refresh
+    if (anim.boost > 0) {
+        speed = 1.5;
+        anim.boost -= 1;
+    }
+    anim.acc += speed;
+    while (anim.acc >= 1) {
+        anim.acc -= 1;
+        anim.idx = (anim.idx + 1) % anim.count;
+    }
+    if (anim.idx != anim.shown) {
+        if (anim.zoom > 1)
+            anim.sprite.SetImage(anim.img[anim.idx].Scale(anim.size, anim.size));
+        else
+            anim.sprite.SetImage(anim.img[anim.idx]);
+        anim.shown = anim.idx;
+    }
+}
+
+# ---- layout below the disc --------------------------------------------------
+BASE = SY + SH / 2 + anim.size / 2 + LH * 1.4;
+Y_INFO = BASE;                       # "wrong passphrase"
+Y_PROMPT = BASE + 16 * SS * 1.6;     # system prompt (small, dim)
+Y_ENTRY = Y_PROMPT + 16 * SS * 2;    # bullets / typed answer
+Y_CAPS = Y_ENTRY + LH * 1.6;         # caps lock hint
+Y_MSG = SY + SH - LH * 2.5;          # boot messages
+
+fun centered(fid, s, y, z) {
+    local.a = FONT[fid].adv;
+    local.t = txt_fit(s, Math.Int(SW * 0.92 / a));
+    local.n = txt_len(t);
+    return txt_run(fid, t, SX + SW / 2 - n * a / 2, y, z);
+}
+
+# ---- password / question state ----------------------------------------------
+P.active = 0;            # 1 = password, 2 = question
+P.bullets = -1;
+P.prompt = "";
+P.last = "";
+P.answered = 0;
+P.err = 0;               # frames left to show "wrong passphrase"
+P.blink = 0;
+P.caps = 0;
+
+fun draw_entry(s) {
+    global.entry_run = centered("w", s, Y_ENTRY, 10);
+    # cursor right after the entry
+    global.cursor_x = SX + SW / 2 + txt_len(txt_fit(s, MAXC)) * ADV / 2;
+    global.cursor_run = txt_run("w", "_", global.cursor_x, Y_ENTRY, 10);
+}
+
+fun on_password(prompt, bullets) {
+    local.s = "";
+    local.i = 0;
+    local.n = 0;
+    if (P.active != 1) {
+        if (P.answered && prompt == P.last) P.err = 200;
+        P.active = 1;
+        P.prompt = prompt;
+        P.bullets = -1;
+        if (prompt == "") prompt = "Passphrase";
+        global.prompt_run = centered("g", prompt, Y_PROMPT, 10);
+        global.question_run = NULL;
+    }
+    if (bullets > P.bullets && P.bullets >= 0) anim.boost += 4 * (bullets - P.bullets);
+    if (bullets != P.bullets) {
+        P.bullets = bullets;
+        n = bullets;
+        if (n > MAXC / 2 - 2) n = Math.Int(MAXC / 2 - 2);
+        for (i = 0; i < n; i++) s = s + "• ";
+        draw_entry(s);
+    }
+}
+
+fun on_question(prompt, entry) {
+    if (P.active != 2) {
+        P.active = 2;
+        P.err = 0;
+        global.err_run = NULL;
+        global.prompt_run = centered("g", prompt, Y_PROMPT, 10);
+    }
+    draw_entry(entry);
+    anim.boost += 4;
+}
+
+fun on_normal() {
+    if (P.active == 1) {
+        P.answered = 1;
+        P.last = P.prompt;
+    }
+    P.active = 0;
+    P.bullets = -1;
+    global.prompt_run = NULL;
+    global.entry_run = NULL;
+    global.cursor_run = NULL;
+    global.caps_run = NULL;
+    P.caps = 0;
+}
+
+fun on_message(text) {
+    global.msg_run = centered("g", text, Y_MSG, 10);
+}
+
+fun on_hide_message(text) {
+    global.msg_run = NULL;
+}
+
+fun refresh() {
+    anim_step();
+    if (P.active) {
+        P.blink = (P.blink + 1) % 50;
+        if (global.cursor_run) run_opacity(global.cursor_run, P.blink < 25);
+        if (P.active == 1 && P.blink % 10 == 0) {
+            if (Plymouth.GetCapslockState()) {
+                if (!P.caps) global.caps_run = centered("r", "[ CAPS LOCK ]", Y_CAPS, 10);
+                P.caps = 1;
+            } else {
+                P.caps = 0;
+                global.caps_run = NULL;
+            }
+        }
+    }
+    if (P.err > 0) {
+        if (!global.err_run) global.err_run = centered("r", "wrong. try again.", Y_INFO, 10);
+        P.err -= 1;
+        if (P.err < 25) run_opacity(global.err_run, P.err / 25);
+        if (P.err == 0) global.err_run = NULL;
+    }
+}
+
+Plymouth.SetRefreshFunction(refresh);
+Plymouth.SetDisplayPasswordFunction(on_password);
+Plymouth.SetDisplayQuestionFunction(on_question);
+Plymouth.SetDisplayNormalFunction(on_normal);
+Plymouth.SetDisplayMessageFunction(on_message);
+Plymouth.SetHideMessageFunction(on_hide_message);

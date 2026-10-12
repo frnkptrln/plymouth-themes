@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Fireflies
+Description=Coupled oscillators (Kuramoto model) that learn to flash in unison
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/fireflies
+ScriptFile=/usr/share/plymouth/themes/fireflies/fireflies.script

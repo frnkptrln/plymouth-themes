@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Trisolaris
+Description=Three suns: a live three-body simulation; typing nudges them, eras end when one is flung away
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/trisolaris
+ScriptFile=/usr/share/plymouth/themes/trisolaris/trisolaris.script

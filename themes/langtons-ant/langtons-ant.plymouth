@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Langton's Ant
+Description=Langton's ant: ten thousand steps of chaos, then a highway; reversed at power-off
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/langtons-ant
+ScriptFile=/usr/share/plymouth/themes/langtons-ant/langtons-ant.script

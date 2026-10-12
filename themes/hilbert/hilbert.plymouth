@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Hilbert
+Description=A pen plotter fills a sheet with a Hilbert curve as the boot progresses
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/hilbert
+ScriptFile=/usr/share/plymouth/themes/hilbert/hilbert.script

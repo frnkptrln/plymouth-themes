@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Oscilloscope
+Description=Lissajous figures on green phosphor; the beam locks to a circle when you unlock
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/oscilloscope
+ScriptFile=/usr/share/plymouth/themes/oscilloscope/oscilloscope.script

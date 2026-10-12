@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Pedro Raccoon (LUKS)
+Description=Pedro Raccoon with a passphrase prompt for encrypted disks
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/pedro-raccoon-luks
+ScriptFile=/usr/share/plymouth/themes/pedro-raccoon-luks/pedro-raccoon-luks.script

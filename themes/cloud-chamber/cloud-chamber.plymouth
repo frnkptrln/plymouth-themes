@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Cloud Chamber
+Description=Particle tracks condensing in a cloud chamber: alphas, electrons and cosmic muons
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/cloud-chamber
+ScriptFile=/usr/share/plymouth/themes/cloud-chamber/cloud-chamber.script

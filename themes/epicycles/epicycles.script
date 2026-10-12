@@ -1,0 +1,831 @@
+# =============================================================================
+#  EPICYCLES — circles riding on circles draw a key.
+#
+#  Any closed curve is a sum of rotating vectors: a Fourier series. Here the
+#  curve is the outline of a key, taken apart into its 64 largest terms and
+#  drawn by a chain of circles, the largest first. With one circle you get a
+#  circle, with three a drop, with sixteen something like a key, with all of
+#  them the key. During boot the terms come in one by one. At the passphrase
+#  prompt only three are left and every character brings two more; a wrong
+#  passphrase throws them out again, the right one brings them all back and
+#  the key is drawn clean in one go. At power-off the circles go, smallest
+#  first.
+#
+#  Claude, October 2026 — for Frank
+# =============================================================================
+
+Window.SetBackgroundTopColor(0.025490, 0.029412, 0.049020);
+Window.SetBackgroundBottomColor(0.025490, 0.029412, 0.049020);
+
+SW = Window.GetWidth();
+SH = Window.GetHeight();
+SX = Window.GetX();
+SY = Window.GetY();
+
+#==============================================================================
+# glyph text engine — bitmap font from PNG atlases (IBM VGA 8x16, CP437)
+#==============================================================================
+TXT.ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+for (TXT.i = 0; TXT.i < 95; TXT.i++) TXT.ord[TXT.ascii.CharAt(TXT.i)] = 32 + TXT.i;
+TXT.u8["☺"] = 1;
+TXT.u8["☻"] = 2;
+TXT.u8["♥"] = 3;
+TXT.u8["♦"] = 4;
+TXT.u8["♣"] = 5;
+TXT.u8["♠"] = 6;
+TXT.u8["•"] = 7;
+TXT.u8["◘"] = 8;
+TXT.u8["○"] = 9;
+TXT.u8["◙"] = 10;
+TXT.u8["♂"] = 11;
+TXT.u8["♀"] = 12;
+TXT.u8["♪"] = 13;
+TXT.u8["♫"] = 14;
+TXT.u8["☼"] = 15;
+TXT.u8["►"] = 16;
+TXT.u8["◄"] = 17;
+TXT.u8["↕"] = 18;
+TXT.u8["‼"] = 19;
+TXT.u8["¶"] = 20;
+TXT.u8["§"] = 21;
+TXT.u8["▬"] = 22;
+TXT.u8["↨"] = 23;
+TXT.u8["↑"] = 24;
+TXT.u8["↓"] = 25;
+TXT.u8["→"] = 26;
+TXT.u8["←"] = 27;
+TXT.u8["∟"] = 28;
+TXT.u8["↔"] = 29;
+TXT.u8["▲"] = 30;
+TXT.u8["▼"] = 31;
+TXT.u8["⌂"] = 127;
+TXT.u8["Ç"] = 128;
+TXT.u8["ü"] = 129;
+TXT.u8["é"] = 130;
+TXT.u8["â"] = 131;
+TXT.u8["ä"] = 132;
+TXT.u8["à"] = 133;
+TXT.u8["å"] = 134;
+TXT.u8["ç"] = 135;
+TXT.u8["ê"] = 136;
+TXT.u8["ë"] = 137;
+TXT.u8["è"] = 138;
+TXT.u8["ï"] = 139;
+TXT.u8["î"] = 140;
+TXT.u8["ì"] = 141;
+TXT.u8["Ä"] = 142;
+TXT.u8["Å"] = 143;
+TXT.u8["É"] = 144;
+TXT.u8["æ"] = 145;
+TXT.u8["Æ"] = 146;
+TXT.u8["ô"] = 147;
+TXT.u8["ö"] = 148;
+TXT.u8["ò"] = 149;
+TXT.u8["û"] = 150;
+TXT.u8["ù"] = 151;
+TXT.u8["ÿ"] = 152;
+TXT.u8["Ö"] = 153;
+TXT.u8["Ü"] = 154;
+TXT.u8["¢"] = 155;
+TXT.u8["£"] = 156;
+TXT.u8["¥"] = 157;
+TXT.u8["₧"] = 158;
+TXT.u8["ƒ"] = 159;
+TXT.u8["á"] = 160;
+TXT.u8["í"] = 161;
+TXT.u8["ó"] = 162;
+TXT.u8["ú"] = 163;
+TXT.u8["ñ"] = 164;
+TXT.u8["Ñ"] = 165;
+TXT.u8["ª"] = 166;
+TXT.u8["º"] = 167;
+TXT.u8["¿"] = 168;
+TXT.u8["⌐"] = 169;
+TXT.u8["¬"] = 170;
+TXT.u8["½"] = 171;
+TXT.u8["¼"] = 172;
+TXT.u8["¡"] = 173;
+TXT.u8["«"] = 174;
+TXT.u8["»"] = 175;
+TXT.u8["░"] = 176;
+TXT.u8["▒"] = 177;
+TXT.u8["▓"] = 178;
+TXT.u8["│"] = 179;
+TXT.u8["┤"] = 180;
+TXT.u8["╡"] = 181;
+TXT.u8["╢"] = 182;
+TXT.u8["╖"] = 183;
+TXT.u8["╕"] = 184;
+TXT.u8["╣"] = 185;
+TXT.u8["║"] = 186;
+TXT.u8["╗"] = 187;
+TXT.u8["╝"] = 188;
+TXT.u8["╜"] = 189;
+TXT.u8["╛"] = 190;
+TXT.u8["┐"] = 191;
+TXT.u8["└"] = 192;
+TXT.u8["┴"] = 193;
+TXT.u8["┬"] = 194;
+TXT.u8["├"] = 195;
+TXT.u8["─"] = 196;
+TXT.u8["┼"] = 197;
+TXT.u8["╞"] = 198;
+TXT.u8["╟"] = 199;
+TXT.u8["╚"] = 200;
+TXT.u8["╔"] = 201;
+TXT.u8["╩"] = 202;
+TXT.u8["╦"] = 203;
+TXT.u8["╠"] = 204;
+TXT.u8["═"] = 205;
+TXT.u8["╬"] = 206;
+TXT.u8["╧"] = 207;
+TXT.u8["╨"] = 208;
+TXT.u8["╤"] = 209;
+TXT.u8["╥"] = 210;
+TXT.u8["╙"] = 211;
+TXT.u8["╘"] = 212;
+TXT.u8["╒"] = 213;
+TXT.u8["╓"] = 214;
+TXT.u8["╫"] = 215;
+TXT.u8["╪"] = 216;
+TXT.u8["┘"] = 217;
+TXT.u8["┌"] = 218;
+TXT.u8["█"] = 219;
+TXT.u8["▄"] = 220;
+TXT.u8["▌"] = 221;
+TXT.u8["▐"] = 222;
+TXT.u8["▀"] = 223;
+TXT.u8["α"] = 224;
+TXT.u8["ß"] = 225;
+TXT.u8["Γ"] = 226;
+TXT.u8["π"] = 227;
+TXT.u8["Σ"] = 228;
+TXT.u8["σ"] = 229;
+TXT.u8["µ"] = 230;
+TXT.u8["τ"] = 231;
+TXT.u8["Φ"] = 232;
+TXT.u8["Θ"] = 233;
+TXT.u8["Ω"] = 234;
+TXT.u8["δ"] = 235;
+TXT.u8["∞"] = 236;
+TXT.u8["φ"] = 237;
+TXT.u8["ε"] = 238;
+TXT.u8["∩"] = 239;
+TXT.u8["≡"] = 240;
+TXT.u8["±"] = 241;
+TXT.u8["≥"] = 242;
+TXT.u8["≤"] = 243;
+TXT.u8["⌠"] = 244;
+TXT.u8["⌡"] = 245;
+TXT.u8["÷"] = 246;
+TXT.u8["≈"] = 247;
+TXT.u8["°"] = 248;
+TXT.u8["∙"] = 249;
+TXT.u8["·"] = 250;
+TXT.u8["√"] = 251;
+TXT.u8["ⁿ"] = 252;
+TXT.u8["²"] = 253;
+TXT.u8["■"] = 254;
+TXT.u8[" "] = 255;
+
+# Turn a string into an array of CP437 codes (out.n = length). out.off[k] is
+# the byte offset where glyph k starts, out.off[out.n] the length in bytes:
+# Plymouth's string functions count bytes, and "•" alone is three of them.
+fun txt_codes(s) {
+    local.out.n = 0;
+    local.i = 0;
+    local.k = 0;
+    local.c = s.CharAt(0);
+    while (c != "") {
+        out.off[out.n] = i;
+        k = TXT.ord[c];
+        if (k) { out[out.n] = k; out.n++; i++; }
+        else {
+            k = TXT.u8[s.SubString(i, i + 3)];
+            if (k) { out[out.n] = k; out.n++; i += 3; }
+            else {
+                k = TXT.u8[s.SubString(i, i + 2)];
+                if (k) { out[out.n] = k; out.n++; i += 2; }
+                else { out[out.n] = 63; out.n++; i++; }
+            }
+        }
+        c = s.CharAt(i);
+    }
+    out.off[out.n] = i;
+    return out;
+}
+
+# Number of glyphs a string renders to.
+fun txt_len(s) {
+    local.c = txt_codes(s);
+    return c.n;
+}
+
+# Load a font atlas. fid: short id, file: atlas PNG, cw/ch: atlas cell size,
+# adv: horizontal advance, lh: line height, pad: glow margin around each glyph.
+FONT.count = 0;     # must exist at top level so functions see the globals
+GLYPH.count = 0;
+
+fun font_load(fid, file, cw, ch, adv, lh, pad) {
+    global.FONT[fid].atlas = Image(file);
+    global.FONT[fid].cw = cw;
+    global.FONT[fid].ch = ch;
+    global.FONT[fid].adv = adv;
+    global.FONT[fid].lh = lh;
+    global.FONT[fid].pad = pad;
+}
+
+fun glyph(fid, code) {
+    if (!GLYPH[fid][code])
+        global.GLYPH[fid][code] = FONT[fid].atlas.Crop((code % 16) * FONT[fid].cw,
+                                                Math.Int(code / 16) * FONT[fid].ch,
+                                                FONT[fid].cw, FONT[fid].ch);
+    return GLYPH[fid][code];
+}
+
+# Create sprites for a string at (x, y). Returns a run object; drop it to erase.
+fun txt_run(fid, s, x, y, z) {
+    local.codes = txt_codes(s);
+    local.r.n = codes.n;
+    local.r.w = codes.n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < codes.n; i++) {
+        if (codes[i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+# Same, from an already decoded code array (from index a, count n).
+fun txt_run_codes(fid, codes, a, n, x, y, z) {
+    local.r.n = n;
+    local.r.w = n * FONT[fid].adv;
+    local.r.x = x;
+    local.r.y = y;
+    local.i = 0;
+    for (i = 0; i < n; i++) {
+        if (codes[a + i] != 32) {
+            r.sp[i] = Sprite(glyph(fid, codes[a + i]));
+            r.sp[i].SetPosition(x + i * FONT[fid].adv - FONT[fid].pad, y - FONT[fid].pad, z);
+        }
+    }
+    return r;
+}
+
+fun run_opacity(r, o) {
+    local.i = 0;
+    for (i = 0; i < r.n; i++) if (r.sp[i]) r.sp[i].SetOpacity(o);
+}
+
+fun run_move(r, x, y) {
+    local.i = 0;
+    local.fid = 0;
+    for (i = 0; i < r.n; i++)
+        if (r.sp[i]) r.sp[i].SetPosition(x + (r.sp[i].GetX() - r.x), y + (r.sp[i].GetY() - r.y), r.sp[i].GetZ());
+    r.x = x;
+    r.y = y;
+}
+
+# Shorten s to at most n glyphs by cutting out the middle, at glyph
+# boundaries, so a multi-byte character is never split.
+fun txt_fit(s, n) {
+    local.c = txt_codes(s);
+    local.h = 0;
+    if (c.n <= n) return s;
+    if (n < 5) return s.SubString(0, c.off[n]);
+    h = Math.Int((n - 3) / 2);
+    return s.SubString(0, c.off[h]) + "..." + s.SubString(c.off[c.n - (n - 3 - h)], c.off[c.n]);
+}
+
+# Uniform random number in [0, 1). Plymouth 24's Math.Random() returns values
+# scaled down by 2^32; normalise so this also works if that ever gets fixed.
+fun rnd() {
+    local.r = Math.Random();
+    if (r < 0.000001) r = r * 4294967296;
+    return r - Math.Int(r);
+}
+
+# Pick the largest integer scale (from 1..maxs) at which a cols x rows grid of
+# (cw x lh) cells still fits into w x h.
+fun pick_scale(w, h, cw, lh, cols, rows, maxs) {
+    local.s = maxs;
+    while (s > 1 && (cols * cw * s > w || rows * lh * s > h)) s--;
+    return s;
+}
+
+
+#==============================================================================
+# passphrase, question and message handling, shared by the newer themes
+#
+# Before prompt_setup() the theme sets
+#   PR.hi, PR.lo, PR.err   font ids: entry, prompt and messages, warnings
+#   PR.y0 .. PR.y3         top of the lines: warning, prompt, entry, caps lock
+#   PR.cx                  centre x of the text (PR.align = "center"), or
+#   PR.left                left edge (PR.align = "left")
+#   PR.maxc                most glyphs on a line
+#   PR.adv                 glyph advance in px
+#   PR.z                   z of the text
+# and defines all of these hooks (empty bodies are fine):
+#   hook_prompt()          a passphrase prompt appeared
+#   hook_wrong()           the same prompt came back: the passphrase was wrong
+#   hook_key(n)            a character was typed, n characters now
+#   hook_erase(n)          a character was deleted
+#   hook_enter()           Enter: the passphrase went to the disk
+#   hook_question()        a question appeared
+# Its refresh function calls prompt_tick() once per frame.
+#==============================================================================
+PR.wrong = "wrong. try again.";
+PR.caps_text = "caps lock";
+PR.align = "center";
+PR.z = 50;
+P.active = 0;          # 0 none, 1 passphrase, 2 question
+P.bullets = -1;
+P.prompt = "";
+P.last = "";
+P.answered = 0;
+P.err = 0;
+P.blink = 0;
+P.caps = 0;
+P.msg = 0;
+
+fun nearest(list, v) {
+    local.best = 999999;
+    local.r = list[0];
+    local.i = 0;
+    for (i = 0; i < list.n; i++)
+        if (Math.Abs(list[i] - v) < best) { best = Math.Abs(list[i] - v); r = list[i]; }
+    return r;
+}
+
+# Pick the LM Mono size for this screen and load the given font ids.
+fun lm_load(ids, target) {
+    local.i = 0;
+    global.FS = nearest(FSL, target);
+    for (i = 0; i < FSL.n; i++) if (FSL[i] == FS) { global.FADV = FSA[i]; global.FLH = FSH[i]; }
+    for (i = 0; i < ids.n; i++)
+        font_load(ids[i], "font-" + ids[i] + "-" + FS + ".png", FADV, FLH, FADV, FLH, 0);
+}
+
+# The four text lines at the bottom of the screen, centred.
+fun prompt_bottom(cx, maxw) {
+    PR.cx = cx;
+    PR.adv = FADV;
+    PR.maxc = Math.Int(maxw / FADV);
+    PR.y3 = SY + SH - Math.Int(FLH * 1.3);
+    PR.y2 = PR.y3 - FLH;
+    PR.y1 = PR.y2 - Math.Int(FLH * 1.05);
+    PR.y0 = PR.y1 - Math.Int(FLH * 1.05);
+}
+
+fun pr_x(n) {
+    if (PR.align == "left") return PR.left;
+    return PR.cx - Math.Int(n * PR.adv / 2);
+}
+
+fun pr_line(fid, s, y) {
+    local.t = txt_fit(s, PR.maxc);
+    return txt_run(fid, t, pr_x(txt_len(t)), y, PR.z);
+}
+
+fun pr_entry(s) {
+    local.t = txt_fit(s, PR.maxc - 2);
+    local.x = pr_x(txt_len(t) + 1);
+    global.PR_ENTRY = txt_run(PR.hi, t, x, PR.y2, PR.z);
+    global.PR_CURSOR = txt_run(PR.hi, "_", x + txt_len(t) * PR.adv, PR.y2, PR.z);
+}
+
+fun on_password(prompt, bullets) {
+    local.s = "";
+    local.i = 0;
+    local.n = 0;
+    if (P.active != 1) {
+        global.PR_MSG = NULL;
+        P.msg = 0;
+        if (P.answered && prompt == P.last) {
+            P.err = 220;
+            global.PR_ERR = NULL;
+            hook_wrong();
+        } else {
+            hook_prompt();
+        }
+        P.active = 1;
+        P.prompt = prompt;
+        P.bullets = -1;
+        if (prompt == "") prompt = "passphrase:";
+        global.PR_PROMPT = pr_line(PR.lo, prompt, PR.y1);
+    }
+    if (bullets != P.bullets) {
+        if (P.bullets >= 0) {
+            if (bullets > P.bullets) hook_key(bullets);
+            else hook_erase(bullets);
+        }
+        P.bullets = bullets;
+        n = bullets;
+        if (n > 40) n = 40;
+        for (i = 0; i < n; i++) s = s + "• ";
+        pr_entry(s);
+    }
+}
+
+fun on_question(prompt, entry) {
+    if (P.active != 2) {
+        P.active = 2;
+        P.err = 0;
+        global.PR_ERR = NULL;
+        global.PR_MSG = NULL;
+        global.PR_PROMPT = pr_line(PR.lo, prompt, PR.y1);
+        hook_question();
+    }
+    pr_entry(entry);
+}
+
+fun on_normal() {
+    if (P.active == 1) {
+        P.answered = 1;
+        P.last = P.prompt;
+        hook_enter();
+    }
+    P.active = 0;
+    P.bullets = -1;
+    global.PR_PROMPT = NULL;
+    global.PR_ENTRY = NULL;
+    global.PR_CURSOR = NULL;
+    global.PR_CAPS = NULL;
+    P.caps = 0;
+}
+
+fun on_message(text) {
+    if (P.active) return;
+    global.PR_MSG = pr_line(PR.lo, text, PR.y1);
+    P.msg = 250;
+}
+
+fun on_hide_message(text) {
+    global.PR_MSG = NULL;
+    P.msg = 0;
+}
+
+fun prompt_tick() {
+    if (P.active) {
+        P.blink = (P.blink + 1) % 50;
+        if (PR_CURSOR) run_opacity(PR_CURSOR, P.blink < 25);
+        if (P.active == 1 && P.blink % 10 == 0) {
+            if (Plymouth.GetCapslockState()) {
+                if (!P.caps) global.PR_CAPS = pr_line(PR.err, PR.caps_text, PR.y3);
+                P.caps = 1;
+            } else {
+                P.caps = 0;
+                global.PR_CAPS = NULL;
+            }
+        }
+    }
+    if (P.err > 0) {
+        if (!PR_ERR) global.PR_ERR = pr_line(PR.err, PR.wrong, PR.y0);
+        P.err--;
+        if (P.err < 30) run_opacity(PR_ERR, P.err / 30);
+        if (P.err == 0) global.PR_ERR = NULL;
+    }
+    if (P.msg > 0) {
+        P.msg--;
+        if (P.msg == 0) global.PR_MSG = NULL;
+    }
+}
+
+fun prompt_setup() {
+    Plymouth.SetDisplayPasswordFunction(on_password);
+    Plymouth.SetDisplayQuestionFunction(on_question);
+    Plymouth.SetDisplayNormalFunction(on_normal);
+    Plymouth.SetDisplayMessageFunction(on_message);
+    Plymouth.SetHideMessageFunction(on_hide_message);
+}
+
+FK[0] = -1; TR_[0] = 0.031025; TI_[0] = 0.426923;
+FK[1] = 1; TR_[1] = -0.041979; TI_[1] = -0.273440;
+FK[2] = 2; TR_[2] = -0.092497; TI_[2] = 0.026143;
+FK[3] = -4; TR_[3] = 0.065978; TI_[3] = -0.017657;
+FK[4] = -2; TR_[4] = -0.040196; TI_[4] = 0.042897;
+FK[5] = 3; TR_[5] = 0.001188; TI_[5] = -0.056038;
+FK[6] = -5; TR_[6] = 0.025154; TI_[6] = -0.049714;
+FK[7] = -3; TR_[7] = -0.041598; TI_[7] = 0.024993;
+FK[8] = 5; TR_[8] = 0.009848; TI_[8] = 0.029576;
+FK[9] = 6; TR_[9] = -0.029719; TI_[9] = 0.003151;
+FK[10] = -8; TR_[10] = -0.026605; TI_[10] = -0.005242;
+FK[11] = 8; TR_[11] = 0.019910; TI_[11] = -0.008768;
+FK[12] = -7; TR_[12] = 0.004745; TI_[12] = -0.014669;
+FK[13] = 7; TR_[13] = -0.004028; TI_[13] = -0.012214;
+FK[14] = 10; TR_[14] = -0.008542; TI_[14] = 0.007729;
+FK[15] = -10; TR_[15] = 0.009317; TI_[15] = 0.003847;
+FK[16] = -14; TR_[16] = -0.008424; TI_[16] = -0.004981;
+FK[17] = 13; TR_[17] = 0.004769; TI_[17] = 0.003491;
+FK[18] = 15; TR_[18] = -0.005271; TI_[18] = -0.001416;
+FK[19] = -6; TR_[19] = -0.001021; TI_[19] = 0.005341;
+FK[20] = -20; TR_[20] = -0.004750; TI_[20] = -0.000485;
+FK[21] = 4; TR_[21] = -0.004341; TI_[21] = 0.001273;
+FK[22] = 9; TR_[22] = -0.003606; TI_[22] = 0.002572;
+FK[23] = -16; TR_[23] = 0.000608; TI_[23] = 0.004322;
+FK[24] = 11; TR_[24] = 0.000483; TI_[24] = -0.004270;
+FK[25] = -11; TR_[25] = -0.000435; TI_[25] = -0.003972;
+FK[26] = 14; TR_[26] = -0.000605; TI_[26] = -0.003918;
+FK[27] = -17; TR_[27] = -0.002388; TI_[27] = -0.003092;
+FK[28] = -18; TR_[28] = 0.001819; TI_[28] = -0.003265;
+FK[29] = -9; TR_[29] = -0.000950; TI_[29] = -0.003399;
+FK[30] = -19; TR_[30] = 0.002096; TI_[30] = 0.002618;
+FK[31] = 16; TR_[31] = 0.002331; TI_[31] = 0.002017;
+FK[32] = 21; TR_[32] = -0.000059; TI_[32] = -0.003036;
+FK[33] = 23; TR_[33] = 0.000520; TI_[33] = 0.002914;
+FK[34] = -12; TR_[34] = -0.000149; TI_[34] = -0.002908;
+FK[35] = 17; TR_[35] = 0.002869; TI_[35] = 0.000250;
+FK[36] = 18; TR_[36] = 0.000788; TI_[36] = -0.002750;
+FK[37] = 22; TR_[37] = -0.000422; TI_[37] = -0.002726;
+FK[38] = 24; TR_[38] = 0.002478; TI_[38] = -0.000862;
+FK[39] = -21; TR_[39] = -0.001740; TI_[39] = -0.001935;
+FK[40] = -15; TR_[40] = 0.002377; TI_[40] = -0.000201;
+FK[41] = -22; TR_[41] = 0.001781; TI_[41] = -0.001530;
+FK[42] = 28; TR_[42] = 0.001160; TI_[42] = -0.001829;
+FK[43] = -23; TR_[43] = 0.001029; TI_[43] = 0.001796;
+FK[44] = -24; TR_[44] = -0.002058; TI_[44] = -0.000031;
+FK[45] = 20; TR_[45] = 0.000726; TI_[45] = 0.001862;
+FK[46] = -13; TR_[46] = 0.001805; TI_[46] = 0.000198;
+FK[47] = -32; TR_[47] = -0.001388; TI_[47] = -0.001033;
+FK[48] = -26; TR_[48] = -0.000293; TI_[48] = -0.001653;
+FK[49] = 34; TR_[49] = 0.000372; TI_[49] = -0.001614;
+FK[50] = 19; TR_[50] = -0.000966; TI_[50] = 0.001326;
+FK[51] = -30; TR_[51] = 0.000469; TI_[51] = -0.001332;
+FK[52] = 12; TR_[52] = 0.001389; TI_[52] = -0.000240;
+FK[53] = -40; TR_[53] = 0.000338; TI_[53] = -0.001266;
+FK[54] = 25; TR_[54] = -0.000069; TI_[54] = -0.001191;
+FK[55] = -29; TR_[55] = -0.001143; TI_[55] = -0.000258;
+FK[56] = -31; TR_[56] = 0.000025; TI_[56] = 0.001157;
+FK[57] = -46; TR_[57] = 0.000032; TI_[57] = -0.001145;
+FK[58] = -38; TR_[58] = -0.000555; TI_[58] = -0.000980;
+FK[59] = 27; TR_[59] = -0.001069; TI_[59] = -0.000328;
+FK[60] = -25; TR_[60] = -0.000694; TI_[60] = -0.000853;
+FK[61] = 37; TR_[61] = 0.000033; TI_[61] = -0.001086;
+FK[62] = 40; TR_[62] = 0.000594; TI_[62] = -0.000879;
+FK[63] = 38; TR_[63] = -0.000994; TI_[63] = -0.000351;
+RRL[0] = 6.000;
+RRL[1] = 8.485;
+RRL[2] = 12.000;
+RRL[3] = 16.971;
+RRL[4] = 24.000;
+RRL[5] = 33.941;
+RRL[6] = 48.000;
+RRL[7] = 67.882;
+RRL[8] = 96.000;
+RRL[9] = 135.765;
+RRL[10] = 192.000;
+RRL[11] = 271.529;
+RRL[12] = 384.000;
+RRL[13] = 543.058;
+RRL[14] = 768.000;
+RRL[15] = 1086.116;
+RRL.n = 16;
+DRL[0] = 1.6;
+DRL[1] = 2.0;
+DRL[2] = 2.6;
+DRL[3] = 3.4;
+DRL[4] = 4.4;
+DRL.n = 5;
+FSL[0] = 14; FSA[0] = 7; FSH[0] = 23;
+FSL[1] = 17; FSA[1] = 9; FSH[1] = 28;
+FSL[2] = 20; FSA[2] = 10; FSH[2] = 32;
+FSL[3] = 24; FSA[3] = 13; FSH[3] = 38;
+FSL[4] = 28; FSA[4] = 15; FSH[4] = 44;
+FSL[5] = 34; FSA[5] = 18; FSH[5] = 53;
+FSL[6] = 40; FSA[6] = 21; FSH[6] = 62;
+FSL.n = 7;
+
+PI = 3.14159265359;
+MODE = Plymouth.GetMode();
+HALT = (MODE == "shutdown" || MODE == "reboot");
+
+# ---- text ---------------------------------------------------------------------
+IDS[0] = "hi"; IDS[1] = "lo"; IDS[2] = "err"; IDS.n = 3;
+lm_load(IDS, SH / 52);
+prompt_bottom(SX + SW / 2, SW * 0.9);
+PR.hi = "hi"; PR.lo = "lo"; PR.err = "err";
+MARGIN = Math.Int(FADV * 2);
+
+# ---- geometry -----------------------------------------------------------------
+# the key is about 1.55 units wide and 0.6 high; the chain reaches further out
+SCL = SW * 0.33;
+if (SCL > (PR.y0 - SY) * 0.62) SCL = (PR.y0 - SY) * 0.62;
+CX = SX + SW / 2;
+CY = SY + (PR.y0 - FLH - SY) / 2 + SCL * 0.04;
+
+NT = 64;
+for (j = 0; j < NT; j++) {
+    AR[j] = TR_[j] * SCL;
+    AI[j] = TI_[j] * SCL;
+    W[j] = 0;
+    WT[j] = 0;
+}
+
+# ---- rings and joints ----------------------------------------------------------
+NR = 14;
+fun ring_image(r) {
+    local.j = 0;
+    while (j < RRL.n - 1 && RRL[j] < r) j++;
+    local.img = Image("ring-" + j + ".png");
+    local.s = img.GetWidth() * r / RRL[j];
+    return img.Scale(Math.Int(s), Math.Int(s));
+}
+JIMG = Image("joint.png");
+JH = JIMG.GetWidth() / 2;
+for (j = 0; j < NR; j++) {
+    RIMG[j] = ring_image(Math.Sqrt(AR[j] * AR[j] + AI[j] * AI[j]));
+    RS[j] = Sprite(RIMG[j]);
+    RH[j] = RIMG[j].GetWidth() / 2;
+    RS[j].SetOpacity(0);
+    JS[j] = Sprite(JIMG);
+    JS[j].SetOpacity(0);
+}
+
+# ---- trail ----------------------------------------------------------------------
+DR = nearest(DRL, SH / 410);
+for (i = 0; i < DRL.n; i++) if (DRL[i] == DR) DI = i;
+DOT = Image("dot-" + DI + ".png");
+DH = DOT.GetWidth() / 2;
+NTR = 1100;
+L = 7;
+for (i = 0; i < NTR; i++) {
+    TRS[i] = Sprite(DOT);
+    TRS[i].SetPosition(-100, -100, 5);
+    TRS[i].SetOpacity(0);
+}
+for (k = 1; k < L; k++) {
+    AGE[k] = Math.Int((k * NTR + L - 1) / L);
+    f = 1 - k / L;
+    OPL[k] = 0.04 + 0.96 * f * f;
+}
+RING_I = 0;
+
+fun trail_point(x, y) {
+    local.k = 0;
+    TRS[RING_I].SetPosition(x - DH, y - DH, 5);
+    TRS[RING_I].SetOpacity(1);
+    for (k = 1; k < L; k++) TRS[(RING_I - AGE[k] + NTR) % NTR].SetOpacity(OPL[k]);
+    global.RING_I = (RING_I + 1) % NTR;
+}
+
+# ---- the series -------------------------------------------------------------------
+TFIG = 9;                      # seconds for one pass round the figure
+SUB = 2;                       # tip positions per frame
+DT = 2 * PI / (TFIG * 50 * SUB);
+TT = 0;                        # parameter, 0 .. 2 pi
+for (j = 0; j < NT; j++) {
+    CR[j] = Math.Cos(FK[j] * DT);
+    CI[j] = Math.Sin(FK[j] * DT);
+    QR[j] = 1;
+    QI[j] = 0;
+}
+FASTN = 0;                     # sub-steps left at double speed (after Enter)
+X = CX;
+Y = CY;
+JX[0] = 0;                     # chain positions for the rings (globals)
+JY[0] = 0;
+
+fun resync() {
+    local.j = 0;
+    for (j = 0; j < NT; j++) {
+        QR[j] = Math.Cos(FK[j] * TT);
+        QI[j] = Math.Sin(FK[j] * TT);
+    }
+}
+
+# move every term one sub-step and return the tip; with joints = 1 also
+# remember the chain for the rings
+fun substep(joints) {
+    local.j = 0;
+    local.x = 0;
+    local.y = 0;
+    local.w = 0;
+    local.qr = 0;
+    for (j = 0; j < NT; j++) {
+        qr = QR[j];
+        QR[j] = qr * CR[j] - QI[j] * CI[j];
+        QI[j] = qr * CI[j] + QI[j] * CR[j];
+        w = W[j];
+        if (joints && j < NR) { JX[j] = x; JY[j] = y; }
+        if (w > 0) {
+            x = x + w * (AR[j] * QR[j] - AI[j] * QI[j]);
+            y = y + w * (AR[j] * QI[j] + AI[j] * QR[j]);
+        }
+    }
+    global.TT = TT + DT;
+    if (TT > 2 * PI) global.TT = TT - 2 * PI;
+    global.X = CX + x;
+    global.Y = CY - y;
+}
+
+fun weights() {
+    local.j = 0;
+    local.w = 0;
+    for (j = 0; j < NT; j++) {
+        w = W[j];
+        if (w != WT[j]) {
+            w = w + (WT[j] - w) * 0.12;
+            if (Math.Abs(w - WT[j]) < 0.01) w = WT[j];
+            W[j] = w;
+        }
+    }
+}
+
+fun rings(half) {
+    local.j = 0;
+    local.o = 0;
+    for (j = half; j < NR; j = j + 2) {
+        o = W[j];
+        if (o > 0.02) {
+            RS[j].SetPosition(CX + JX[j] - RH[j], CY - JY[j] - RH[j], 2);
+            RS[j].SetOpacity(0.5 * o);
+            JS[j].SetPosition(CX + JX[j] - JH, CY - JY[j] - JH, 3);
+            JS[j].SetOpacity(0.8 * o);
+        } else {
+            RS[j].SetOpacity(0);
+            JS[j].SetOpacity(0);
+        }
+    }
+}
+
+# ---- how many terms -----------------------------------------------------------------
+NA = 0;                        # terms switched on
+fun set_terms(n) {
+    local.j = 0;
+    if (n < 0) n = 0;
+    if (n > NT) n = NT;
+    global.NA = n;
+    for (j = 0; j < NT; j++) WT[j] = (j < n);
+}
+
+# ---- readout --------------------------------------------------------------------------
+SHOWN = "";
+fun readout() {
+    local.s = "fourier series · " + NA + " of " + NT + " terms";
+    if (s == SHOWN) return;
+    global.SHOWN = s;
+    global.READ_R = txt_run("lo", s, SX + MARGIN, SY + Math.Int(FLH * 0.8), 50);
+}
+
+# ---- passphrase hooks -------------------------------------------------------------------
+MODE_T = "boot";               # boot, prompt, open, night
+fun hook_prompt() { global.MODE_T = "prompt"; set_terms(3); }
+fun hook_key(n) { set_terms(3 + 2 * n); }
+fun hook_erase(n) { set_terms(3 + 2 * n); }
+fun hook_wrong() { global.MODE_T = "prompt"; set_terms(3); }
+fun hook_enter() {
+    local.i = 0;
+    local.j = 0;
+    # the old trail goes out, every term is there at once, and the key is
+    # drawn clean in one pass at double speed
+    global.MODE_T = "open";
+    set_terms(NT);
+    for (j = 0; j < NT; j++) W[j] = 1;
+    for (i = 0; i < NTR; i++) TRS[i].SetOpacity(0);
+    global.FASTN = Math.Int(TFIG * 50 * SUB * 1.04);
+}
+fun hook_question() { }
+
+# ---- main loop ----------------------------------------------------------------------------
+FRAME = 0;
+if (HALT) {
+    MODE_T = "night";
+    set_terms(NT);
+    for (j = 0; j < NT; j++) W[j] = 1;
+    if (MODE == "reboot") NIGHT_R = pr_line("lo", "see you soon.", PR.y1);
+    else NIGHT_R = pr_line("lo", "good night.", PR.y1);
+}
+
+fun refresh() {
+    local.u = 0;
+    local.s = 0;
+    global.FRAME++;
+    if (MODE_T == "boot" && FRAME % 8 == 0 && NA < NT) set_terms(NA + 1);
+    if (MODE_T == "night" && FRAME > 60 && FRAME % 4 == 0 && NA > 0) set_terms(NA - 1);
+    weights();
+    substep(0);
+    trail_point(X, Y);
+    if (FASTN > 0) {
+        substep(0);
+        trail_point(X, Y);
+        substep(0);
+        trail_point(X, Y);
+        global.FASTN = FASTN - 3;
+    }
+    substep(1);
+    trail_point(X, Y);
+    rings(FRAME % 2);
+    if (FRAME % 200 == 0) resync();
+    if (FRAME % 10 == 0) readout();
+    prompt_tick();
+}
+
+# three circles are there from the start, so the pen never sets out from the centre
+if (!HALT) { set_terms(3); W[0] = 1; W[1] = 1; W[2] = 1; }
+readout();
+prompt_setup();
+Plymouth.SetRefreshFunction(refresh);

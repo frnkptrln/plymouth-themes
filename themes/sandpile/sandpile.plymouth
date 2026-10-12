@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Sandpile
+Description=The abelian sandpile: avalanches of every size in slow motion, a fractal mandala
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/sandpile
+ScriptFile=/usr/share/plymouth/themes/sandpile/sandpile.script
