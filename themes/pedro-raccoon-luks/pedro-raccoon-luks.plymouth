@@ -1,6 +1,6 @@
 [Plymouth Theme]
 Name=Pedro Raccoon (LUKS)
-Description=Pedro Raccoon with a passphrase prompt for encrypted disks
+Description=Pedro Raccoon Plymouth by FilaCo, with a passphrase prompt for encrypted disks
 ModuleName=script
 
 [script]

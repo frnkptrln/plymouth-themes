@@ -1,7 +1,8 @@
-"""pedro-raccoon-luks: the original Pedro animation plus a LUKS passphrase prompt.
+"""pedro-raccoon-luks: FilaCo's Pedro animation plus a LUKS passphrase prompt.
 
-The 198 animation frames belong to "Pedro Raccoon Plymouth"
-(opendesktop.org/p/2148515) and are not part of this repository. The build
+The 198 animation frames come with "Pedro Raccoon Plymouth" by FilaCo (MIT,
+https://github.com/FilaCo/plymouth-theme-pedro-raccoon, also on the KDE Store
+as store.kde.org/p/2148515) and are not part of this repository. The build
 writes only the script, the fonts and the .plymouth file; install.sh copies
 the frames from the installed original theme (/usr/share/plymouth/themes/
 pedro-raccoon).
@@ -21,12 +22,13 @@ COLORS = {
 SCRIPT = r'''# =============================================================================
 #  Pedro Raccoon — LUKS edition
 #
-#  Animation: "Pedro Raccoon Plymouth" (opendesktop.org/p/2148515), unchanged.
+#  Animation from "Pedro Raccoon Plymouth" by FilaCo (MIT licence),
+#  https://github.com/FilaCo/plymouth-theme-pedro-raccoon
+#  (also store.kde.org/p/2148515): its 198 frames, unchanged, copied from the
+#  installed original by install.sh.
 #  Added: passphrase / question / message display for encrypted disks, drawn
 #  with a bitmap font so it needs nothing from the initramfs besides this
 #  folder. Pedro dances faster while you type.
-#  Fixed: the original loaded frames 1..197 into slots 1..197 and played slot
-#  0 (empty) once per loop, so frame 198 never showed and one frame was blank.
 #
 #  Claude, October 2026 — for Frank
 # =============================================================================
@@ -64,7 +66,7 @@ if (SH >= 1700) anim.zoom = 2;
 anim.size = anim.img[0].GetWidth() * anim.zoom;
 anim.sprite = Sprite();
 anim.sprite.SetPosition(SX + SW / 2 - anim.size / 2, SY + SH / 2 - anim.size / 2, 0);
-anim.idx = 169;          # like the original: start near the end of the loop
+anim.idx = 169;          # like the original's 1.0: start near the end of the loop
 anim.shown = -1;
 anim.acc = 0;
 anim.boost = 0;          # extra frames to dance through (typing)
@@ -210,7 +212,7 @@ Plymouth.SetHideMessageFunction(on_hide_message);
 
 PLYMOUTH = """[Plymouth Theme]
 Name=Pedro Raccoon (LUKS)
-Description=Pedro Raccoon with a passphrase prompt for encrypted disks
+Description=Pedro Raccoon Plymouth by FilaCo, with a passphrase prompt for encrypted disks
 ModuleName=script
 
 [script]

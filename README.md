@@ -10,9 +10,10 @@ through a cloud chamber. They work just as well without encryption, and
 thirteen of them have a screen of their own for power-off and reboot.
 
 Everything is computed while the machine boots, by Plymouth's script plugin;
-only `pedro-raccoon-luks` plays a pre-drawn animation. All text comes from
-bitmap glyphs inside the theme folder, so nothing depends on fonts or on
-Plymouth's label plugin being in the initramfs.
+only `pedro-raccoon-luks` plays a pre-drawn animation, the one from FilaCo's
+[Pedro Raccoon Plymouth](https://github.com/FilaCo/plymouth-theme-pedro-raccoon).
+All text comes from bitmap glyphs inside the theme folder, so nothing depends
+on fonts or on Plymouth's label plugin being in the initramfs.
 
 <table>
 <tr>
@@ -21,7 +22,7 @@ Plymouth's label plugin being in the initramfs.
 </tr>
 <tr>
 <td><img src="previews/oscilloscope.gif" alt="oscilloscope"><br><b>oscilloscope</b> · Lissajous figures on green phosphor</td>
-<td><img src="previews/pedro-raccoon-luks.gif" alt="pedro-raccoon-luks"><br><b>pedro-raccoon-luks</b> · Pedro, now with a passphrase prompt</td>
+<td><img src="previews/pedro-raccoon-luks.gif" alt="pedro-raccoon-luks"><br><b>pedro-raccoon-luks</b> · FilaCo's Pedro Raccoon, with a passphrase prompt</td>
 </tr>
 <tr>
 <td><img src="previews/trisolaris.gif" alt="trisolaris"><br><b>trisolaris</b> · three suns, a live three-body simulation</td>
@@ -66,11 +67,17 @@ frequency ratios while the phase drifts. Keystrokes disturb the signal; after
 Enter the figure locks to 1:1, a circle, and a wrong passphrase tears it apart.
 At power-off the picture collapses like on an old tube.
 
-**pedro-raccoon-luks.** [Pedro Raccoon Plymouth](https://www.opendesktop.org/p/2148515)
-with a prompt for encrypted disks; Pedro dances faster while you type. It also
-fixes the original loop, which skipped the last frame and showed an empty one.
-The animation is not part of this repository: install the original theme
-first, and `install.sh` takes the frames from there.
+**pedro-raccoon-luks.** This scene is FilaCo's:
+[Pedro Raccoon Plymouth](https://github.com/FilaCo/plymouth-theme-pedro-raccoon)
+(MIT licence; also on the [KDE Store](https://store.kde.org/p/2148515)), here
+with a passphrase prompt in the bitmap font of the other themes, which also
+handles a retry, questions and messages. Pedro dances faster while you type.
+The original's repository has had a passphrase prompt of its own since April
+2026 (after its release 1.1), written with Plymouth's label plugin. Its
+animation is not part of this repository: install the original first (from
+the AUR as `plymouth-theme-pedro-raccoon`, or copy its `pedro-raccoon` folder
+to `/usr/share/plymouth/themes/`), and `install.sh` takes the frames from
+there.
 
 **trisolaris.** Three suns in a live three-body simulation. Every boot starts
 on a known periodic orbit (figure-eight, butterfly, moth, yin-yang, goggles,
@@ -274,8 +281,9 @@ exceptions:
   B. Jackowski and J. M. Nowacki, and readback's big letters are sampled from
   Latin Modern Sans Bold by the same authors, under the GUST Font License
   (`LICENSES/GUST-FONT-LICENSE.txt`).
-- The Pedro Raccoon animation belongs to the author of
-  [Pedro Raccoon Plymouth](https://www.opendesktop.org/p/2148515) and is not
-  included.
+- The Pedro Raccoon animation comes with
+  [Pedro Raccoon Plymouth](https://github.com/FilaCo/plymouth-theme-pedro-raccoon)
+  by FilaCo (MIT licence) and is not included; `pedro-raccoon-luks` takes the
+  frames from the installed original.
 
 The themes were written by Claude (Anthropic) for Frank Peterlein in October 2026.

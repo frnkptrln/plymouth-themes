@@ -150,8 +150,11 @@ if [ "$THEME" = pedro-raccoon-luks ] && [ ! -f "$SRC/$THEME/animation-1.png" ]; 
   if [ -f "$PEDRO_ORIG/animation-198.png" ]; then
     FRAMES="$PEDRO_ORIG"
   else
-    say "pedro-raccoon-luks needs the original theme 'Pedro Raccoon Plymouth'"
-    say "(opendesktop.org/p/2148515) installed in $PEDRO_ORIG for its frames."
+    say "pedro-raccoon-luks plays the animation of 'Pedro Raccoon Plymouth' by FilaCo,"
+    say "which is not part of this repository. Install the original first, so that"
+    say "its frames are in $PEDRO_ORIG:"
+    say "  https://github.com/FilaCo/plymouth-theme-pedro-raccoon"
+    say "  (on Arch: the AUR package plymouth-theme-pedro-raccoon)"
     exit 1
   fi
 fi
