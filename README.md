@@ -9,7 +9,8 @@ cellular automaton, startles a swarm of fireflies or sends a cosmic-ray shower
 through a cloud chamber. They work just as well without encryption, and
 each has a screen of its own for power-off and reboot.
 
-Everything is computed while the machine boots, by Plymouth's script plugin.
+Everything is computed while the machine boots, by Plymouth's script plugin;
+only sandpile starts from a pile its build computed.
 All text comes from bitmap glyphs inside the theme folder, so nothing depends
 on fonts or on Plymouth's label plugin being in the initramfs.
 
@@ -95,9 +96,14 @@ plotter retraces the curve and lifts it off the paper.
 
 **sandpile.** The abelian sandpile of Bak, Tang and Wiesenfeld: grains fall
 onto the middle, cells with four grains topple, and avalanches of every size
-grow a fractal mandala, in slow motion. A keystroke drops a pinch of grains, a
-wrong passphrase a whole sack; the pattern stays symmetric either way. At
-power-off the wind takes the sand.
+grow a fractal mandala. It starts from 16,384 grains: the 4,900,462 topplings
+they need would take the boot at least fifty minutes, so the build does them,
+and since the order of the topplings does not matter, the result is exactly
+the pile the grains would have built. From there it runs live, and every
+toppling cell lights up, so an avalanche runs through the mandala as a slow
+wave of light. A keystroke drops a pinch of grains, a wrong passphrase a whole
+sack; the pattern stays symmetric either way. At power-off the wind takes the
+sand.
 
 **langtons-ant.** One ant, two rules: about ten thousand steps of chaos, then
 the ant starts building a highway. Typing flips cells in front of it, a wrong
