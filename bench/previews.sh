@@ -12,10 +12,9 @@ declare -A CROP=(
   [oscilloscope]=1000:900:460:100
   [hilbert]=980:1080:470:0
   [sandpile]=1080:1024:420:56
-  [pedro-raccoon-luks]=1200:1080:360:0
 )
 declare -A WIDTH=(
-  [oscilloscope]=480 [hilbert]=440 [sandpile]=460 [pedro-raccoon-luks]=480
+  [oscilloscope]=480 [hilbert]=440 [sandpile]=460
   [eca]=480 [waterfall]=480
 )
 declare -A COLOURS=([oscilloscope]=48 [readback]=64)

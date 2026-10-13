@@ -29,7 +29,7 @@ shift $((OPTIND - 1))
 THEMES=("$@")
 [ ${#THEMES[@]} -eq 0 ] && mapfile -t THEMES < <(bench_themes)
 
-bench_init convert
+bench_init
 WORK="${KEEP:-$(mktemp -d)}"
 mkdir -p "$WORK"
 WORK="$(realpath "$WORK")"
