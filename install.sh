@@ -12,7 +12,6 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC="$HERE/themes"
 DEST=/usr/share/plymouth/themes
-PEDRO_ORIG="$DEST/pedro-raccoon"     # frames of pedro-raccoon-luks come from here
 
 THEMES=()
 for d in "$SRC"/*/; do
@@ -144,35 +143,15 @@ if [ "$(id -u)" -ne 0 ]; then
   say "Run with sudo."; exit 1
 fi
 
-# pedro-raccoon-luks: the animation frames are not in this repository
-FRAMES=""
-if [ "$THEME" = pedro-raccoon-luks ] && [ ! -f "$SRC/$THEME/animation-1.png" ]; then
-  if [ -f "$PEDRO_ORIG/animation-198.png" ]; then
-    FRAMES="$PEDRO_ORIG"
-  else
-    say "pedro-raccoon-luks plays the animation of 'Pedro Raccoon Plymouth' by FilaCo,"
-    say "which is not part of this repository. Install the original first, so that"
-    say "its frames are in $PEDRO_ORIG:"
-    say "  https://github.com/FilaCo/plymouth-theme-pedro-raccoon"
-    say "  (on Arch: the AUR package plymouth-theme-pedro-raccoon)"
-    exit 1
-  fi
-fi
-
 say "== Installing $THEME to $DEST/$THEME"
 install -d -m 0755 "$DEST/$THEME"
 find "$SRC/$THEME" -maxdepth 1 -type f -print0 | while IFS= read -r -d '' f; do
   install -m 0644 "$f" "$DEST/$THEME/"
 done
-if [ -n "$FRAMES" ]; then
-  for i in $(seq 1 198); do install -m 0644 "$FRAMES/animation-$i.png" "$DEST/$THEME/"; done
-  ok "198 animation frames taken from $FRAMES"
-fi
 # leftovers of an older version would otherwise end up in the initramfs too
 find "$DEST/$THEME" -maxdepth 1 -type f -print0 | while IFS= read -r -d '' f; do
   b="$(basename "$f")"
   [ -e "$SRC/$THEME/$b" ] && continue
-  [ -n "$FRAMES" ] && [ -e "$FRAMES/$b" ] && continue
   rm -f "$f"; say "  removed (old): $b"
 done
 ok "$(find "$DEST/$THEME" -type f | wc -l) files"

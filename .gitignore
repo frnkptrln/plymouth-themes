@@ -2,9 +2,6 @@
 __pycache__/
 *.py[cod]
 
-# The Pedro Raccoon frames come from the original theme, never from here
-themes/pedro-raccoon-luks/animation-*.png
-
 # Bench output
 smoke-out/
 *.mp4

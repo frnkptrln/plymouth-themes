@@ -22,7 +22,6 @@ set -u
 BENCH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(dirname "$BENCH")"
 STAGE=/run/plymouth/themes
-PEDRO_ORIG=/usr/share/plymouth/themes/pedro-raccoon
 # shellcheck disable=SC2034  # used by the scripts that source this
 PROMPT_TEXT="Please enter passphrase for disk Samsung SSD 970 EVO (luks-3f2a9c1e):"
 
@@ -100,17 +99,6 @@ bench_stage() {   # bench_stage NAME: copy themes/NAME to /run/plymouth/themes/N
   sed -i "s#/usr/share/plymouth/themes/$n#$dst#g" "$dst/$n.plymouth"
   if [ "$n" = readback ] && [ -n "${READBACK_NAME:-}" ]; then
     sed -i "s/^MACHINE = \"[^\"]*\";/MACHINE = \"$READBACK_NAME\";/" "$dst/readback.script"
-  fi
-  if [ "$n" = pedro-raccoon-luks ] && [ ! -f "$dst/animation-1.png" ]; then
-    if [ -f "$PEDRO_ORIG/animation-198.png" ]; then
-      cp "$PEDRO_ORIG"/animation-*.png "$dst"/
-    else
-      # the original frames are not in this repository: stand-ins, so the
-      # script around them can still be tested
-      convert -size 320x320 gradient:'#1c2a3a-#8ab4d8' "$dst/animation-1.png"
-      local i
-      for i in $(seq 2 198); do cp "$dst/animation-1.png" "$dst/animation-$i.png"; done
-    fi
   fi
 }
 

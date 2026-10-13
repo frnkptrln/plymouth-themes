@@ -1,6 +1,6 @@
 # Working in this repository
 
-Fourteen Plymouth boot splash themes that draw their own LUKS passphrase
+Thirteen Plymouth boot splash themes that draw their own LUKS passphrase
 prompt: Python generators in `src/`, the built themes in `themes/`, install
 and preview scripts, and a bench in `bench/` that runs Plymouth inside Xvfb.
 
@@ -35,9 +35,6 @@ the pull request says what the change did to it.
   runs in CI.
 - At 1920 × 1080 a theme stays at or below about 30 % of one CPU core in
   `bench/cpu.sh`, where the heaviest ones are today.
-- The Pedro Raccoon frames come with FilaCo's original theme
-  (github.com/FilaCo/plymouth-theme-pedro-raccoon); they are not part of this
-  repository and are never committed.
 - `install.sh` writes the machine's name into the installed copy of readback;
   `themes/readback` keeps `localhost`, so the build stays reproducible. The
   bench takes the name from `READBACK_NAME`.

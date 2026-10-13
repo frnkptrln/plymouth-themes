@@ -2,16 +2,14 @@
 
 Custom Plymouth boot themes. Small scenes for the moments before everything begins.
 
-Fourteen boot splashes for [Plymouth](https://gitlab.freedesktop.org/plymouth/plymouth),
+Thirteen boot splashes for [Plymouth](https://gitlab.freedesktop.org/plymouth/plymouth),
 made for machines with an encrypted disk. Each theme draws the LUKS passphrase
 prompt itself and reacts to what you type: a wrong passphrase scrambles a
 cellular automaton, startles a swarm of fireflies or sends a cosmic-ray shower
 through a cloud chamber. They work just as well without encryption, and
-thirteen of them have a screen of their own for power-off and reboot.
+each has a screen of its own for power-off and reboot.
 
-Everything is computed while the machine boots, by Plymouth's script plugin;
-only `pedro-raccoon-luks` plays a pre-drawn animation, the one from FilaCo's
-[Pedro Raccoon Plymouth](https://github.com/FilaCo/plymouth-theme-pedro-raccoon).
+Everything is computed while the machine boots, by Plymouth's script plugin.
 All text comes from bitmap glyphs inside the theme folder, so nothing depends
 on fonts or on Plymouth's label plugin being in the initramfs.
 
@@ -22,26 +20,25 @@ on fonts or on Plymouth's label plugin being in the initramfs.
 </tr>
 <tr>
 <td><img src="previews/oscilloscope.gif" alt="oscilloscope"><br><b>oscilloscope</b> · Lissajous figures on green phosphor</td>
-<td><img src="previews/pedro-raccoon-luks.gif" alt="pedro-raccoon-luks"><br><b>pedro-raccoon-luks</b> · FilaCo's Pedro Raccoon, with a passphrase prompt</td>
-</tr>
-<tr>
 <td><img src="previews/trisolaris.gif" alt="trisolaris"><br><b>trisolaris</b> · three suns, a live three-body simulation</td>
+</tr>
+<tr>
 <td><img src="previews/fireflies.gif" alt="fireflies"><br><b>fireflies</b> · a swarm that learns to flash in unison</td>
-</tr>
-<tr>
 <td><img src="previews/cloud-chamber.gif" alt="cloud-chamber"><br><b>cloud-chamber</b> · particle tracks in supersaturated vapour</td>
+</tr>
+<tr>
 <td><img src="previews/epicycles.gif" alt="epicycles"><br><b>epicycles</b> · circles on circles draw a key</td>
-</tr>
-<tr>
 <td><img src="previews/hilbert.gif" alt="hilbert"><br><b>hilbert</b> · a pen plotter draws a space-filling curve</td>
+</tr>
+<tr>
 <td><img src="previews/sandpile.gif" alt="sandpile"><br><b>sandpile</b> · avalanches of every size, in slow motion</td>
-</tr>
-<tr>
 <td><img src="previews/langtons-ant.gif" alt="langtons-ant"><br><b>langtons-ant</b> · ten thousand steps of chaos, then a highway</td>
-<td><img src="previews/waterfall.gif" alt="waterfall"><br><b>waterfall</b> · the 433 MHz band on a software radio</td>
 </tr>
 <tr>
+<td><img src="previews/waterfall.gif" alt="waterfall"><br><b>waterfall</b> · the 433 MHz band on a software radio</td>
 <td><img src="previews/busy-beaver.gif" alt="busy-beaver"><br><b>busy-beaver</b> · the five-state champion, running live</td>
+</tr>
+<tr>
 <td><img src="previews/readback.gif" alt="readback"><br><b>readback</b> · the boot, written into the machine's name</td>
 </tr>
 </table>
@@ -66,18 +63,6 @@ power-off rule 128 erodes everything.
 frequency ratios while the phase drifts. Keystrokes disturb the signal; after
 Enter the figure locks to 1:1, a circle, and a wrong passphrase tears it apart.
 At power-off the picture collapses like on an old tube.
-
-**pedro-raccoon-luks.** This scene is FilaCo's:
-[Pedro Raccoon Plymouth](https://github.com/FilaCo/plymouth-theme-pedro-raccoon)
-(MIT licence; also on the [KDE Store](https://store.kde.org/p/2148515)), here
-with a passphrase prompt in the bitmap font of the other themes, which also
-handles a retry, questions and messages. Pedro dances faster while you type.
-The original's repository has had a passphrase prompt of its own since April
-2026 (after its release 1.1), written with Plymouth's label plugin. Its
-animation is not part of this repository: install the original first (from
-the AUR as `plymouth-theme-pedro-raccoon`, or copy its `pedro-raccoon` folder
-to `/usr/share/plymouth/themes/`), and `install.sh` takes the frames from
-there.
 
 **trisolaris.** Three suns in a live three-body simulation. Every boot starts
 on a known periodic orbit (figure-eight, butterfly, moth, yin-yang, goggles,
@@ -214,13 +199,13 @@ previous default theme is put back afterwards.
 
   | theme | CPU | theme | CPU |
   |---|---:|---|---:|
-  | robi-386 | 5 % | busy-beaver | 13 % |
-  | pedro-raccoon-luks | 7 % | waterfall | 15 % |
+  | robi-386 | 5 % | waterfall | 15 % |
   | cloud-chamber | 8 % | fireflies | 17 % |
   | readback | 9 % | sandpile | 17 % |
   | langtons-ant | 10 % | epicycles | 22 % |
   | eca | 11 % | oscilloscope | 26 % |
   | hilbert | 12 % | trisolaris | 29 % |
+  | busy-beaver | 13 % |  |  |
 
   At 3840 × 2160 with `DeviceScale=1` the heavy ones need about twice as
   much (trisolaris 60 %, oscilloscope 50 %); robi-386 stays at 5 %.
@@ -276,14 +261,10 @@ exceptions:
 
 - `src/font_8x16.c` is the IBM VGA 8×16 font from the Linux kernel, under
   GPL-2.0 (`LICENSES/GPL-2.0.txt`); so are the bitmap font atlases rendered
-  from it in `robi-386`, `oscilloscope` and `pedro-raccoon-luks`.
+  from it in `robi-386` and `oscilloscope`.
 - The font atlases of the other themes are rendered from Latin Modern Mono by
   B. Jackowski and J. M. Nowacki, and readback's big letters are sampled from
   Latin Modern Sans Bold by the same authors, under the GUST Font License
   (`LICENSES/GUST-FONT-LICENSE.txt`).
-- The Pedro Raccoon animation comes with
-  [Pedro Raccoon Plymouth](https://github.com/FilaCo/plymouth-theme-pedro-raccoon)
-  by FilaCo (MIT licence) and is not included; `pedro-raccoon-luks` takes the
-  frames from the installed original.
 
 The themes were written by Claude (Anthropic) for Frank Peterlein in October 2026.
