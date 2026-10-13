@@ -213,9 +213,9 @@ previous default theme is put back afterwards.
   | theme | CPU | theme | CPU |
   |---|---:|---|---:|
   | robi-386 | 5 % | waterfall | 15 % |
-  | cloud-chamber | 8 % | fireflies | 17 % |
-  | readback | 9 % | sandpile | 17 % |
-  | langtons-ant | 10 % | epicycles | 22 % |
+  | cloud-chamber | 8 % | sandpile | 22 % |
+  | readback | 9 % | epicycles | 22 % |
+  | langtons-ant | 10 % | fireflies | 26 % |
   | eca | 11 % | oscilloscope | 26 % |
   | hilbert | 12 % | trisolaris | 29 % |
   | busy-beaver | 13 % |  |  |
