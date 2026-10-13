@@ -73,7 +73,10 @@ begins. At power-off gravity fades away.
 
 **fireflies.** A swarm of fireflies as coupled oscillators (the Kuramoto
 model). The coupling grows during boot, so you watch them go from twinkling at
-random to flashing together. Typing knocks a few out of step, a wrong
+random to flashing together. They fly over a meadow that stays as dark as the
+night until they light it: the air glows with what flashes at the same moment,
+so scattered flashes leave it black, and a swarm in unison brings the grass out
+against the light, once a flash. Typing knocks a few out of step, a wrong
 passphrase startles all of them, Enter pulls them into tight unison. At
 power-off they go dark one by one.
 
