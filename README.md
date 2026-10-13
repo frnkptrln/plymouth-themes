@@ -110,11 +110,15 @@ beacon, a weather station, a LoRa channel. Every keystroke goes out as a LoRa
 packet; the right passphrase is answered by the gateway, a wrong one by a
 jammer across the band. At power-off the stations go quiet.
 
-**busy-beaver.** The five-state busy beaver champion runs live, with the tape
-around its head and a space-time diagram below. It would halt after 47,176,870
-steps, which at boot speed takes well over an hour. It ignores your typing; a
-wrong passphrase sends it back to step 0, and at power-off it says how many
-steps it was short of halting.
+**busy-beaver.** The five-state busy beaver champion runs live: the tape
+around its head at the top, below it the whole run from step 0, one row of
+tape every so many steps. The machine fills stretches of tape with ones and
+leaves combs of 100100… behind, and the rows pile up into a landscape of
+domes; when they reach the bottom, time is halved, and when the tape outgrows
+the screen, the cells get narrower. It would halt after 47,176,870 steps,
+which at boot speed takes well over an hour. It ignores your typing; a wrong
+passphrase sends it back to step 0 and wipes the landscape, and at power-off
+it says how many steps it was short of halting.
 
 **readback.** Nothing on this screen is made up. Before the passphrase it is
 a field of noise, standing in for what the encrypted disk is without its key.
