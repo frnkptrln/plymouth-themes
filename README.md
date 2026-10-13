@@ -9,7 +9,8 @@ cellular automaton, startles a swarm of fireflies or sends a cosmic-ray shower
 through a cloud chamber. They work just as well without encryption, and
 each has a screen of its own for power-off and reboot.
 
-Everything is computed while the machine boots, by Plymouth's script plugin.
+Everything is computed while the machine boots, by Plymouth's script plugin;
+only sandpile starts from a pile its build computed.
 All text comes from bitmap glyphs inside the theme folder, so nothing depends
 on fonts or on Plymouth's label plugin being in the initramfs.
 
@@ -72,7 +73,10 @@ begins. At power-off gravity fades away.
 
 **fireflies.** A swarm of fireflies as coupled oscillators (the Kuramoto
 model). The coupling grows during boot, so you watch them go from twinkling at
-random to flashing together. Typing knocks a few out of step, a wrong
+random to flashing together. They fly over a meadow that stays as dark as the
+night until they light it: the air glows with what flashes at the same moment,
+so scattered flashes leave it black, and a swarm in unison brings the grass out
+against the light, once a flash. Typing knocks a few out of step, a wrong
 passphrase startles all of them, Enter pulls them into tight unison. At
 power-off they go dark one by one.
 
@@ -95,9 +99,14 @@ plotter retraces the curve and lifts it off the paper.
 
 **sandpile.** The abelian sandpile of Bak, Tang and Wiesenfeld: grains fall
 onto the middle, cells with four grains topple, and avalanches of every size
-grow a fractal mandala, in slow motion. A keystroke drops a pinch of grains, a
-wrong passphrase a whole sack; the pattern stays symmetric either way. At
-power-off the wind takes the sand.
+grow a fractal mandala. It starts from 16,384 grains: the 4,900,462 topplings
+they need would take the boot at least fifty minutes, so the build does them,
+and since the order of the topplings does not matter, the result is exactly
+the pile the grains would have built. From there it runs live, and every
+toppling cell lights up, so an avalanche runs through the mandala as a slow
+wave of light. A keystroke drops a pinch of grains, a wrong passphrase a whole
+sack; the pattern stays symmetric either way. At power-off the wind takes the
+sand.
 
 **langtons-ant.** One ant, two rules: about ten thousand steps of chaos, then
 the ant starts building a highway. Typing flips cells in front of it, a wrong
@@ -110,11 +119,15 @@ beacon, a weather station, a LoRa channel. Every keystroke goes out as a LoRa
 packet; the right passphrase is answered by the gateway, a wrong one by a
 jammer across the band. At power-off the stations go quiet.
 
-**busy-beaver.** The five-state busy beaver champion runs live, with the tape
-around its head and a space-time diagram below. It would halt after 47,176,870
-steps, which at boot speed takes well over an hour. It ignores your typing; a
-wrong passphrase sends it back to step 0, and at power-off it says how many
-steps it was short of halting.
+**busy-beaver.** The five-state busy beaver champion runs live: the tape
+around its head at the top, below it the whole run from step 0, one row of
+tape every so many steps. The machine fills stretches of tape with ones and
+leaves combs of 100100… behind, and the rows pile up into a landscape of
+domes; when they reach the bottom, time is halved, and when the tape outgrows
+the screen, the cells get narrower. It would halt after 47,176,870 steps,
+which at boot speed takes well over an hour. It ignores your typing; a wrong
+passphrase sends it back to step 0 and wipes the landscape, and at power-off
+it says how many steps it was short of halting.
 
 **readback.** Nothing on this screen is made up. Before the passphrase it is
 a field of noise, standing in for what the encrypted disk is without its key.
@@ -200,9 +213,9 @@ previous default theme is put back afterwards.
   | theme | CPU | theme | CPU |
   |---|---:|---|---:|
   | robi-386 | 5 % | waterfall | 15 % |
-  | cloud-chamber | 8 % | fireflies | 17 % |
-  | readback | 9 % | sandpile | 17 % |
-  | langtons-ant | 10 % | epicycles | 22 % |
+  | cloud-chamber | 8 % | sandpile | 22 % |
+  | readback | 9 % | epicycles | 22 % |
+  | langtons-ant | 10 % | fireflies | 26 % |
   | eca | 11 % | oscilloscope | 26 % |
   | hilbert | 12 % | trisolaris | 29 % |
   | busy-beaver | 13 % |  |  |

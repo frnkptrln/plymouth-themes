@@ -9,8 +9,9 @@ import lib
 NAME = "busy-beaver"
 BG = (10, 10, 12)
 FULL = (236, 232, 220)
-HALF = (118, 114, 108)
+DIAG = (200, 194, 182)            # the ones in the space-time diagram
 EMPTY_CELL = (34, 34, 38)
+COMB_MAX = 16                     # comb textures for 1..16 px per cell
 HEAD = (255, 176, 64)
 TEXT = {"hi": (236, 232, 220, 255), "lo": (112, 110, 106, 255), "err": (255, 120, 84, 255),
         "am": (255, 176, 64, 255)}
@@ -25,8 +26,12 @@ SCRIPT = r'''# =================================================================
 #  is proven that no 5-state machine that halts runs longer. Here it runs a
 #  few thousand steps a second, so it will not halt before your login.
 #  At the top: the tape around the head and the state. Below: the tape over
-#  time, one row every few hundred steps: a pair of cells with two ones is
-#  drawn light, a pair with one grey.
+#  time, from step 0 down to now, one row every so many steps. The machine
+#  lays down long runs of ones and stretches of 100100…, drawn as a comb;
+#  the domes are the sweeps in which it fills a stretch up again. When the
+#  rows reach the bottom, every second one goes and the rest close up, so
+#  the whole run stays on the screen; when the tape outgrows the width, the
+#  cells get narrower.
 #  It ignores your typing, it is busy. A wrong passphrase sends it back to
 #  step 0. At power-off it stops and says how far it got.
 #
@@ -69,14 +74,11 @@ WR[9] = 0; MV[9] = -1; NX[9] = 0;     # E1 0LA
 LETTER[0] = "A"; LETTER[1] = "B"; LETTER[2] = "C"; LETTER[3] = "D"; LETTER[4] = "E"; LETTER[5] = "H";
 
 OFF = 100000;                 # keeps tape positions positive
-TAPE[0] = 0;                  # global hashes the functions write into
-BS[0] = 0;                    # ones per block of two cells
+TAPE[0] = 0;                  # global hash the functions write into
 
 fun reset() {
     global.TAPE = NULL;
     global.TAPE[0] = 0;
-    global.BS = NULL;
-    global.BS[0] = 0;
     global.POS = OFF;
     global.ST = 0;
     global.STEPS = 0;
@@ -94,7 +96,8 @@ fun run(n) {
     local.c = 0;
     local.i = 0;
     local.w = 0;
-    local.b = 0;
+    local.lo = LO;
+    local.hi = HI;
     for (k = 0; k < n && s < 5; k++) {
         c = TAPE[p];
         if (!c) c = 0;
@@ -102,19 +105,18 @@ fun run(n) {
         w = WR[i];
         if (w != c) {
             TAPE[p] = w;
-            b = Math.Int(p / 2);
-            if (!BS[b]) BS[b] = 0;
-            BS[b] = BS[b] + w - c;
             global.ONES = ONES + w - c;
         }
         p = p + MV[i];
+        if (p < lo) lo = p;
+        else if (p > hi) hi = p;
         s = NX[i];
     }
     global.STEPS = STEPS + k;
     global.POS = p;
     global.ST = s;
-    if (p < LO) global.LO = p;
-    if (p > HI) global.HI = p;
+    global.LO = lo;
+    global.HI = hi;
 }
 
 # ---- tape window ---------------------------------------------------------------------
@@ -154,68 +156,139 @@ fun draw_window() {
     }
 }
 
-# ---- the space-time diagram: one row every RSTEP steps, written top to bottom -------
-DX0 = SX + Math.Int(SW * 0.08);
-DX1 = SX + Math.Int(SW * 0.92);
-DY0 = WY + CW + Math.Int(FLH * 2.6);
-DY1 = PR.y0 - Math.Int(FLH * 1.2);
-RH_ = Math.Max(1, Math.Int(SH / 540));          # row height in px
+# ---- the space-time diagram -----------------------------------------------------------
+DX0 = SX + Math.Int(SW * 0.06);
+DX1 = SX + Math.Int(SW * 0.94);
+WD = DX1 - DX0;
+DY0 = WY + CW + Math.Int(FLH * 2.4);
+DY1 = PR.y0 - Math.Int(FLH * 1.0);
+RH_ = Math.Int(SH / 360 + 0.5);                 # row height in px
+if (RH_ < 2) RH_ = 2;
 NROWS = Math.Int((DY1 - DY0) / RH_);
-LEFT_CELL = OFF - 860;                          # the tape grows to the left: ~860 cells
-NCELLS = 900;                                   # after half a minute, ~1050 after a minute
-BPX = (DX1 - DX0) / (NCELLS / 2);               # px per block of two cells
-BAR1 = Image("one.png");
-BAR2 = Image("half.png");
-ROW = 0;
-RSTEP = 600;
-NEXTROW = RSTEP;
-RW[0].n = 0;                                    # sprites of each row
-WHEAD = Sprite(Image("head.png").Scale(DX1 - DX0, 1));
+PXC0 = Math.Int(WD / 300);                      # px per cell at the start: ~300 cells wide
+if (PXC0 < 1) PXC0 = 1;
+if (PXC0 > %(comb_max)d) PXC0 = %(comb_max)d;
+RSTEP0 = 100;
+IMG_ONE = Image("diag.png");
+IMG_DIM = Image("dim.png");                     # a comb, when a pixel holds several cells
+HAVE_TILE = Image.Tile;                         # not in Plymouth 22.02.122 and older
+for (i = 1; i <= %(comb_max)d; i++) COMB[i] = Image("comb-" + i + ".png");
+WHEAD = Sprite(Image("head.png").Scale(WD, 1));
 WHEAD.SetOpacity(0.5);
+RO[0].n = 0;              # the rows, by id: n segments a[k]..b[k], t[k] 0 run 1 comb, sp[k]
+ORD[0] = 0;               # the ids of the rows on the screen, top to bottom
 
-fun bar(r, n, img, b0, b1) {
-    local.x0 = DX0 + Math.Int((b0 - LEFT_CELL / 2) * BPX);
-    local.x1 = DX0 + Math.Int((b1 - LEFT_CELL / 2) * BPX);
-    if (x1 <= x0) x1 = x0 + 1;
-    RW[r].sp[n] = Sprite(img.Scale(x1 - x0, RH_));
-    RW[r].sp[n].SetPosition(x0, DY0 + r * RH_, 4);
+fun diag_clear() {
+    global.RO = NULL;
+    global.RO[0].n = 0;
+    global.NR = 0;
+    global.NEXTID = 1;
+    global.RSTEP = RSTEP0;
+    global.NEXTROW = RSTEP0;
+    global.PXC = PXC0;                          # px per cell, or
+    global.CPX = 1;                             # cells per px
+    global.RIGHT = OFF + 28;                    # the tape hardly grows to the right
+    global.L0 = RIGHT - Math.Int(WD * CPX / PXC);
+    WHEAD.SetPosition(DX0, DY0, 7);
+}
+diag_clear();
+
+fun cx(c) {
+    return DX0 + Math.Int((c - L0) * PXC / CPX);
 }
 
+fun draw_row(id, r) {
+    local.k = 0;
+    local.x0 = 0;
+    local.x1 = 0;
+    local.img = NULL;
+    local.y = DY0 + r * RH_;
+    for (k = 0; k < RO[id].n; k++) {
+        x0 = cx(RO[id].a[k]);
+        x1 = cx(RO[id].b[k]);
+        if (x1 <= x0) x1 = x0 + 1;
+        if (RO[id].t[k] == 0) img = IMG_ONE.Scale(x1 - x0, RH_);
+        else if (CPX == 1 && HAVE_TILE) img = COMB[PXC].Tile(x1 - x0, RH_);
+        else img = IMG_DIM.Scale(x1 - x0, RH_);
+        RO[id].sp[k] = Sprite(img);
+        RO[id].sp[k].SetPosition(x0, y, 4);
+    }
+}
+
+# narrower cells once the tape reaches the left edge (or the right one)
+fun fit_width() {
+    local.r = 0;
+    local.changed = 0;
+    if (HI + 4 > RIGHT) {
+        global.RIGHT = HI + 28;
+        global.L0 = RIGHT - Math.Int(WD * CPX / PXC);
+        changed = 1;
+    }
+    while (LO < L0 + 4) {
+        if (PXC > 1) global.PXC = PXC - 1;
+        else global.CPX = CPX + 1;
+        global.L0 = RIGHT - Math.Int(WD * CPX / PXC);
+        changed = 1;
+    }
+    if (!changed) return;
+    for (r = 0; r < NR; r++) {
+        RO[ORD[r]].sp = NULL;
+        draw_row(ORD[r], r);
+    }
+}
+
+# the rows have reached the bottom: every second one goes, the rest close up
+fun compress() {
+    local.r = 0;
+    local.k = 0;
+    local.n2 = 0;
+    local.id = 0;
+    for (r = 0; r < NR; r++) {
+        id = ORD[r];
+        if (r %% 2) {
+            RO[id] = NULL;
+            continue;
+        }
+        for (k = 0; k < RO[id].n; k++) RO[id].sp[k].SetY(DY0 + n2 * RH_);
+        ORD[n2] = id;
+        n2++;
+    }
+    global.NR = n2;
+    global.RSTEP = RSTEP * 2;
+}
+
+# one row: the whole tape, as runs of ones and combs of 100100…
 fun write_row() {
-    local.r = ROW;
-    local.b = 0;
-    local.b0 = Math.Int(LO / 2) - 1;
-    local.b1 = Math.Int(HI / 2) + 1;
-    local.lev = 0;
-    local.cur = -1;
-    local.start = 0;
+    local.id = NEXTID;
+    local.i = LO;
+    local.j = 0;
     local.n = 0;
-    if (b0 < Math.Int(LEFT_CELL / 2)) b0 = Math.Int(LEFT_CELL / 2);
-    if (b1 > Math.Int((LEFT_CELL + NCELLS) / 2)) b1 = Math.Int((LEFT_CELL + NCELLS) / 2);
-    RW[r] = NULL;
-    RW[r].n = 0;
-    for (b = b0; b <= b1 + 1; b++) {
-        lev = BS[b];
-        if (!lev || b > b1) lev = 0;
-        if (lev != cur) {
-            if (cur == 2) { bar(r, n, BAR1, start, b); n++; }
-            else if (cur == 1) { bar(r, n, BAR2, start, b); n++; }
-            cur = lev;
-            start = b;
+    global.NEXTID = NEXTID + 1;
+    fit_width();
+    while (i <= HI) {
+        if (!TAPE[i]) {
+            i++;
+        } else if (TAPE[i + 1]) {
+            j = i + 1;
+            while (TAPE[j + 1]) j++;
+            RO[id].a[n] = i; RO[id].b[n] = j + 1; RO[id].t[n] = 0; n++;
+            i = j + 1;
+        } else if (!TAPE[i + 2] && TAPE[i + 3]) {
+            j = i;
+            while (!TAPE[j + 1] && !TAPE[j + 2] && TAPE[j + 3]) j = j + 3;
+            RO[id].a[n] = i; RO[id].b[n] = j + 1; RO[id].t[n] = 1; n++;
+            i = j + 1;
+        } else {
+            RO[id].a[n] = i; RO[id].b[n] = i + 1; RO[id].t[n] = 0; n++;
+            i++;
         }
     }
-    RW[r].n = n;
-    global.ROW = (ROW + 1) %% NROWS;
-    WHEAD.SetPosition(DX0, DY0 + ROW * RH_, 7);
-    # the row just ahead of the write head is cleared, so the sweep is visible
-    RW[ROW] = NULL;
-    RW[ROW].n = 0;
-}
-
-fun clear_rows() {
-    local.r = 0;
-    for (r = 0; r < NROWS; r++) { RW[r] = NULL; RW[r].n = 0; }
-    global.ROW = 0;
+    RO[id].n = n;
+    ORD[NR] = id;
+    draw_row(id, NR);
+    global.NR = NR + 1;
+    if (NR >= NROWS) compress();
+    WHEAD.SetPosition(DX0, DY0 + NR * RH_, 7);
 }
 
 # ---- readout -------------------------------------------------------------------------
@@ -249,8 +322,7 @@ fun hook_erase(n) { }
 fun hook_wrong() {
     # back to step 0
     reset();
-    clear_rows();
-    global.NEXTROW = RSTEP;
+    diag_clear();
 }
 fun hook_enter() { global.SPEED = 160; }
 fun hook_question() { }
@@ -258,11 +330,19 @@ fun hook_question() { }
 # ---- main loop -----------------------------------------------------------------------------
 FRAME = 0;
 fun refresh() {
+    local.left = SPEED;
+    local.n = 0;
     global.FRAME++;
-    run(SPEED);
-    while (STEPS >= NEXTROW) {
-        write_row();
-        global.NEXTROW = NEXTROW + RSTEP;
+    # run up to each row's step, so every row shows the tape at its own step
+    while (left > 0 && ST < 5) {
+        n = NEXTROW - STEPS;
+        if (n > left) n = left;
+        run(n);
+        left = left - n;
+        if (STEPS >= NEXTROW) {
+            write_row();
+            global.NEXTROW = NEXTROW + RSTEP;
+        }
     }
     draw_window();
     if (FRAME %% 5 == 0) readout();
@@ -299,13 +379,22 @@ def build(dist):
         shutil.rmtree(out)
     os.makedirs(out)
     Image.new("RGBA", (8, 8), FULL + (255,)).save(os.path.join(out, "one.png"))
-    Image.new("RGBA", (8, 8), HALF + (255,)).save(os.path.join(out, "half.png"))
     Image.new("RGBA", (8, 8), EMPTY_CELL + (255,)).save(os.path.join(out, "zero.png"))
+    Image.new("RGBA", (8, 8), DIAG + (255,)).save(os.path.join(out, "diag.png"))
+    # a comb below one pixel per cell: a third of the cells are ones
+    dim = tuple((d + 2 * b) // 3 for d, b in zip(DIAG, BG))
+    Image.new("RGBA", (8, 8), dim + (255,)).save(os.path.join(out, "dim.png"))
+    # 100 at c px per cell, tiled along a comb
+    for c in range(1, COMB_MAX + 1):
+        im = Image.new("RGBA", (3 * c, 1), (0, 0, 0, 0))
+        im.paste(DIAG + (255,), (0, 0, c, 1))
+        im.save(os.path.join(out, "comb-%d.png" % c))
     head_image().save(os.path.join(out, "head.png"))
     t = [lib.lm_fonts(out, TEXT, BG + (255,))]
     bg = ["%.6f" % ((c + 0.5) / 255) for c in BG]
     script = SCRIPT % {"lib": lib.lib_script(), "prompt": lib.prompt_script(), "tables": "\n".join(t),
-                       "bgr": bg[0], "bgg": bg[1], "bgb": bg[2], "machine": MACHINE}
+                       "bgr": bg[0], "bgg": bg[1], "bgb": bg[2], "machine": MACHINE,
+                       "comb_max": COMB_MAX}
     open(os.path.join(out, NAME + ".script"), "w").write(script)
     open(os.path.join(out, NAME + ".plymouth"), "w").write(PLYMOUTH.format(name=NAME))
     return out
